@@ -3,7 +3,19 @@ import { useAccount, useConnect, useDisconnect } from 'wagmi';
 
 // Wallet selection modal component
 const WalletSelectionModal = ({ isOpen, onClose, connectors, onSelectWallet, isPending }) => {
-  if (!isOpen) return null;
+  const [isVisible, setIsVisible] = React.useState(false);
+
+  React.useEffect(() => {
+    if (isOpen) {
+      setIsVisible(true);
+    } else {
+      // Delay hiding to allow for smooth transition
+      const timer = setTimeout(() => setIsVisible(false), 150);
+      return () => clearTimeout(timer);
+    }
+  }, [isOpen]);
+
+  if (!isVisible) return null;
 
   const getWalletIcon = (connectorName) => {
     const name = connectorName.toLowerCase();
@@ -23,19 +35,49 @@ const WalletSelectionModal = ({ isOpen, onClose, connectors, onSelectWallet, isP
     return connectorName;
   };
 
+  const handleBackdropClick = (e) => {
+    if (e.target === e.currentTarget) {
+      onClose();
+    }
+  };
+
+  const handleKeyDown = (e) => {
+    if (e.key === 'Escape') {
+      onClose();
+    }
+  };
+
+  React.useEffect(() => {
+    if (isOpen) {
+      document.addEventListener('keydown', handleKeyDown);
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.removeEventListener('keydown', handleKeyDown);
+      document.body.style.overflow = 'unset';
+    }
+
+    return () => {
+      document.removeEventListener('keydown', handleKeyDown);
+      document.body.style.overflow = 'unset';
+    };
+  }, [isOpen]);
+
   return (
-    <div style={{
-      position: 'fixed',
-      top: 0,
-      left: 0,
-      right: 0,
-      bottom: 0,
-      backgroundColor: 'rgba(0, 0, 0, 0.5)',
-      display: 'flex',
-      alignItems: 'center',
-      justifyContent: 'center',
-      zIndex: 1000
-    }}>
+    <div 
+      style={{
+        position: 'fixed',
+        top: 0,
+        left: 0,
+        right: 0,
+        bottom: 0,
+        backgroundColor: 'rgba(0, 0, 0, 0.5)',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        zIndex: 1000
+      }}
+      onClick={handleBackdropClick}
+    >
       <div style={{
         backgroundColor: 'white',
         borderRadius: '12px',
@@ -128,31 +170,35 @@ export default function WalletConnect() {
     const detectAvailableConnectors = async () => {
       const available = [];
       
-      for (const connector of connectors) {
-        try {
-          // Check if connector is available
-          if (connector.name.toLowerCase().includes('injected')) {
-            // For injected connector, check if any wallet is available
-            if (window.ethereum) {
+      try {
+        for (const connector of connectors) {
+          try {
+            // Check if connector is available
+            if (connector.name.toLowerCase().includes('injected')) {
+              // For injected connector, check if any wallet is available
+              if (typeof window !== 'undefined' && window.ethereum) {
+                available.push(connector);
+              }
+            } else if (connector.name.toLowerCase().includes('metamask')) {
+              // Check specifically for MetaMask
+              if (typeof window !== 'undefined' && window.ethereum?.isMetaMask) {
+                available.push(connector);
+              }
+            } else if (connector.name.toLowerCase().includes('coinbase')) {
+              // Check for Coinbase Wallet
+              if (typeof window !== 'undefined' && window.ethereum?.isCoinbaseWallet) {
+                available.push(connector);
+              }
+            } else {
+              // For other connectors like WalletConnect, assume they're available
               available.push(connector);
             }
-          } else if (connector.name.toLowerCase().includes('metamask')) {
-            // Check specifically for MetaMask
-            if (window.ethereum?.isMetaMask) {
-              available.push(connector);
-            }
-          } else if (connector.name.toLowerCase().includes('coinbase')) {
-            // Check for Coinbase Wallet
-            if (window.ethereum?.isCoinbaseWallet) {
-              available.push(connector);
-            }
-          } else {
-            // For other connectors like WalletConnect, assume they're available
-            available.push(connector);
+          } catch (error) {
+            console.log(`Connector ${connector.name} not available:`, error);
           }
-        } catch (error) {
-          console.log(`Connector ${connector.name} not available:`, error);
         }
+      } catch (error) {
+        console.error('Error detecting connectors:', error);
       }
       
       setAvailableConnectors(available);

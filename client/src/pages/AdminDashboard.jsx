@@ -28,32 +28,10 @@ export default function AdminDashboard() {
     staleTime: 30000,
   });
 
-  // Mock data for demonstration when API is not available
-  const mockStats = {
-    totalBatches: 1247,
-    totalManufacturers: 23,
-    totalRecalledBatches: 3,
-    totalExpiredScans: 15,
-    network: 'Sepolia Testnet',
-    chainId: '11155111',
-    adminAddress: address || '0x0000000000000000000000000000000000000000'
-  };
-
-  const mockReports = [
-    { batchId: 'BATCH-001', medicineName: 'Aspirin 100mg', expiredScanCount: 5 },
-    { batchId: 'BATCH-002', medicineName: 'Paracetamol 500mg', expiredScanCount: 3 },
-    { batchId: 'BATCH-003', medicineName: 'Ibuprofen 200mg', expiredScanCount: 2 }
-  ];
-
-  const mockUnverifiedManufacturers = [
-    { name: 'PharmaCorp Ltd', license: 'PH-2024-001', wallet: '0x1234...5678', email: 'contact@pharmacorp.com' },
-    { name: 'MedSupply Inc', license: 'MS-2024-002', wallet: '0x8765...4321', email: 'info@medsupply.com' }
-  ];
-
-  // Use mock data if API is not available
-  const stats = statsData?.stats || mockStats;
-  const reports = reportsData?.data?.reports || mockReports;
-  const unverifiedManufacturers = unverifiedData?.data?.manufacturers || mockUnverifiedManufacturers;
+  // Use real data from API
+  const stats = statsData?.stats || {};
+  const reports = reportsData?.data?.reports || [];
+  const unverifiedManufacturers = unverifiedData?.data?.manufacturers || [];
   
   // Check if user is admin
   const isAdmin = address && stats?.adminAddress && 
@@ -83,7 +61,7 @@ export default function AdminDashboard() {
     );
   }
 
-  // Show API error warning if backend is not available
+  // Show API error if backend is not available
   const hasApiError = statsError || reportsError || unverifiedError;
   const isBackendUnavailable = hasApiError && (
     statsError?.message?.includes('ECONNREFUSED') ||
@@ -124,23 +102,23 @@ export default function AdminDashboard() {
 
   return (
     <div style={{ padding: '20px', maxWidth: '1200px', margin: '0 auto' }}>
-      {/* API Status Warning */}
+      {/* API Error */}
       {isBackendUnavailable && (
         <div style={{ 
           marginBottom: '24px',
           padding: '16px',
-          backgroundColor: '#fef3c7',
-          border: '2px solid #f59e0b',
+          backgroundColor: '#fef2f2',
+          border: '2px solid #ef4444',
           borderRadius: '8px'
         }}>
-          <h4 style={{ margin: '0 0 8px 0', color: '#92400e' }}>
-            ⚠️ Backend Server Not Available
+          <h4 style={{ margin: '0 0 8px 0', color: '#dc2626' }}>
+            ❌ Backend Server Not Available
           </h4>
-          <p style={{ margin: '0 0 8px 0', color: '#92400e' }}>
-            The backend API server is not running. Showing demo data for demonstration purposes.
+          <p style={{ margin: '0 0 8px 0', color: '#dc2626' }}>
+            Cannot connect to backend server. Please start the backend server on port 5000.
           </p>
-          <p style={{ margin: '0', color: '#92400e', fontSize: '14px' }}>
-            To connect to real data, start the backend server on port 5000.
+          <p style={{ margin: '0', color: '#dc2626', fontSize: '14px' }}>
+            Run: <code style={{ backgroundColor: '#f3f4f6', padding: '2px 4px', borderRadius: '3px' }}>npm run backend</code>
           </p>
         </div>
       )}

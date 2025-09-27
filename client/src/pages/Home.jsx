@@ -22,18 +22,8 @@ export default function Home() {
     canRegisterAsManufacturer
   } = useRole();
 
-  // Mock data for demonstration when API is not available
-  const mockStats = {
-    totalBatches: 1247,
-    totalManufacturers: 23,
-    totalRecalledBatches: 3,
-    totalExpiredScans: 15,
-    network: 'Sepolia Testnet',
-    chainId: '11155111'
-  };
-
-  // Use mock data if API is not available
-  const stats = data?.stats || mockStats;
+  // Use real data from API
+  const stats = data?.stats || {};
   const isBackendUnavailable = error && error.message?.includes('ECONNREFUSED');
 
   if (isLoading) {
@@ -195,23 +185,23 @@ export default function Home() {
 
   return (
     <div style={{ padding: '20px', maxWidth: '1200px', margin: '0 auto' }}>
-      {/* API Status Warning */}
+      {/* API Error */}
       {isBackendUnavailable && (
         <div style={{ 
           marginBottom: '24px',
           padding: '16px',
-          backgroundColor: '#fef3c7',
-          border: '2px solid #f59e0b',
+          backgroundColor: '#fef2f2',
+          border: '2px solid #ef4444',
           borderRadius: '8px'
         }}>
-          <h4 style={{ margin: '0 0 8px 0', color: '#92400e' }}>
-            ⚠️ Backend Server Not Available
+          <h4 style={{ margin: '0 0 8px 0', color: '#dc2626' }}>
+            ❌ Backend Server Not Available
           </h4>
-          <p style={{ margin: '0 0 8px 0', color: '#92400e' }}>
-            The backend API server is not running. Showing demo data for demonstration purposes.
+          <p style={{ margin: '0 0 8px 0', color: '#dc2626' }}>
+            Cannot connect to backend server. Please start the backend server on port 5000.
           </p>
-          <p style={{ margin: '0', color: '#92400e', fontSize: '14px' }}>
-            To connect to real data, start the backend server on port 5000.
+          <p style={{ margin: '0', color: '#dc2626', fontSize: '14px' }}>
+            Run: <code style={{ backgroundColor: '#f3f4f6', padding: '2px 4px', borderRadius: '3px' }}>npm run backend</code>
           </p>
         </div>
       )}
