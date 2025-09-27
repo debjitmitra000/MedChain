@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useAccount, useConnect, useDisconnect } from 'wagmi';
+import { useNavigate } from 'react-router-dom'; // Add this import
 
 // Wallet selection modal component
 const WalletSelectionModal = ({ isOpen, onClose, connectors, onSelectWallet, isPending, darkMode = true }) => {
@@ -136,6 +137,7 @@ export default function WalletConnect({ darkMode = true }) {
   const { address, isConnected } = useAccount();
   const { connect, connectors, isPending } = useConnect();
   const { disconnect } = useDisconnect();
+  const navigate = useNavigate(); // Add this hook
   const [showWalletModal, setShowWalletModal] = useState(false);
   const [availableConnectors, setAvailableConnectors] = useState([]);
 
@@ -199,6 +201,12 @@ export default function WalletConnect({ darkMode = true }) {
     connect({ connector });
   };
 
+  // Handle disconnect and navigate to landing page
+  const handleDisconnect = () => {
+    disconnect();
+    navigate('/'); // Navigate to landing page after disconnect
+  };
+
   if (isConnected) {
     return (
       <div className="flex items-center gap-3">
@@ -210,7 +218,7 @@ export default function WalletConnect({ darkMode = true }) {
           {address?.slice(0, 6)}...{address?.slice(-4)}
         </div>
         <button
-          onClick={() => disconnect()}
+          onClick={handleDisconnect}
           className={`px-4 py-2 rounded-lg text-sm font-medium transition-all duration-300 hover:scale-105 ${
             darkMode
               ? 'bg-red-500/20 text-red-400 border border-red-500/30 hover:bg-red-500/30'
