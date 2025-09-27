@@ -22,3 +22,56 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+# Environment variables
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# Testing and coverage
+/coverage
+*.lcov
+.nyc_output
+
+# Cache directories
+.cache
+.parcel-cache
+.vite
+.eslintcache
+.stylelintcache
+
+# Build and deployment
+/build
+.vercel
+.netlify
+
+# Optional files
+.npm
+*.tsbuildinfo
+.yarn-integrity
+
+# Temporary and backup files
+tmp/
+temp/
+*.tmp
+*.bak
+*.backup
+
+# Project specific
+public/uploads/
+src/temp/
+
+# Wallet connection cache (for wagmi)
+.wagmi-cache/
+
+# Bundle analysis
+bundle-report.html
+stats.html
+webpack-bundle-analyzer-report.html
+
+# Testing frameworks
+cypress/videos/
+cypress/screenshots/
+test-results/
+playwright-report/
