@@ -1,8 +1,28 @@
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useWalletClient, usePublicClient, useAccount } from 'wagmi';
 import { prepareRegisterManufacturer } from '../api/manufacturer';
+import { useTheme } from '../contexts/ThemeContext';
+import {
+  Factory,
+  User,
+  Mail,
+  Award,
+  Wallet,
+  CheckCircle2,
+  AlertTriangle,
+  Loader2,
+  Shield,
+  FileText,
+  Clock,
+  Zap,
+  Info,
+  AlertCircle,
+  ArrowRight,
+  ExternalLink,
+} from 'lucide-react';
 
 export default function ManufacturerRegister() {
+  const { darkMode } = useTheme();
   const { data: walletClient } = useWalletClient();
   const publicClient = usePublicClient();
   const { address } = useAccount();
@@ -16,13 +36,14 @@ export default function ManufacturerRegister() {
   const [err, setErr] = useState(null);
   const [status, setStatus] = useState('idle'); // 'idle', 'preparing', 'pending', 'confirming', 'success', 'error'
 
-  // Auto-update address when wallet connects
+  // Auto-update address when wallet connects - PRESERVED EXACTLY
   useEffect(() => {
     if (address) {
       setForm(f => ({ ...f, manufacturerAddress: address }));
     }
   }, [address]);
 
+  // PRESERVED ORIGINAL FUNCTIONS
   const onChange = (e) => setForm((s) => ({ ...s, [e.target.name]: e.target.value }));
 
   async function submit() {
@@ -78,169 +99,490 @@ export default function ManufacturerRegister() {
   const getStatusMessage = () => {
     switch (status) {
       case 'preparing':
-        return '🔄 Preparing registration...';
+        return 'Preparing registration...';
       case 'pending':
-        return '📝 Please confirm transaction in your wallet...';
+        return 'Please confirm transaction in your wallet...';
       case 'confirming':
-        return '⏳ Waiting for blockchain confirmation...';
+        return 'Waiting for blockchain confirmation...';
       case 'success':
-        return '✅ Registration submitted successfully!';
+        return 'Registration submitted successfully!';
       case 'error':
-        return '❌ Registration failed';
+        return 'Registration failed';
       default:
         return '';
+    }
+  };
+
+  const getStatusIcon = () => {
+    switch (status) {
+      case 'preparing':
+      case 'pending':
+      case 'confirming':
+        return <Loader2 className="w-5 h-5 animate-spin" />;
+      case 'success':
+        return <CheckCircle2 className="w-5 h-5 text-emerald-500" />;
+      case 'error':
+        return <AlertTriangle className="w-5 h-5 text-red-500" />;
+      default:
+        return null;
     }
   };
 
   const isProcessing = ['preparing', 'pending', 'confirming'].includes(status);
 
   return (
-    <div>
-      <h3>Register as Manufacturer</h3>
-      
-      <div style={{ 
-        padding: 16, 
-        backgroundColor: '#e7f3ff', 
-        border: '1px solid #b3d9ff',
-        borderRadius: 4,
-        marginBottom: 20 
-      }}>
-        <h4 style={{ margin: '0 0 8px 0', color: '#0056b3' }}>📝 Self-Registration Process</h4>
-        <ol style={{ margin: 0, paddingLeft: 20 }}>
-          <li>Fill out your company details below</li>
-          <li>Submit registration transaction</li>
-          <li>Wait for blockchain confirmation</li>
-          <li>Wait for admin verification</li>
-          <li>Once verified, you can register medicine batches</li>
-        </ol>
+    <div className={`min-h-screen font-sans transition-colors duration-500 ${
+      darkMode ? 'bg-slate-950 text-white' : 'bg-white text-slate-900'
+    }`}>
+      {/* Floating Geometric Shapes Background */}
+      <div className="fixed inset-0 overflow-hidden pointer-events-none">
+        <div className="absolute top-20 left-10 w-16 h-16 bg-blue-500/5 rounded-full animate-pulse"></div>
+        <div className="absolute top-40 right-20 w-8 h-8 bg-emerald-500/10 rotate-45 animate-spin" style={{ animationDuration: '8s' }}></div>
+        <div className="absolute bottom-32 left-20 w-12 h-12 bg-purple-500/5 rounded-full animate-bounce" style={{ animationDelay: '1s' }}></div>
+        <div className="absolute bottom-40 right-10 w-6 h-6 bg-amber-500/10 rotate-12 animate-pulse" style={{ animationDelay: '2s' }}></div>
       </div>
 
-      {/* Status Display */}
-      {status !== 'idle' && (
-        <div style={{ 
-          marginBottom: 20,
-          padding: 12,
-          borderRadius: 4,
-          backgroundColor: 
-            status === 'success' ? '#d4edda' :
-            status === 'error' ? '#f8d7da' :
-            '#fff3cd',
-          border: `1px solid ${
-            status === 'success' ? '#c3e6cb' :
-            status === 'error' ? '#f5c6cb' :
-            '#ffeaa7'
-          }`
-        }}>
-          <p style={{ margin: 0, fontWeight: 'bold' }}>
-            {getStatusMessage()}
+      <div className="relative max-w-4xl mx-auto px-6 py-8">
+        {/* Hero Header */}
+        <div className="text-center mb-16">
+          <div className={`inline-flex items-center gap-3 px-6 py-3 rounded-full mb-6 border ${
+            darkMode 
+              ? 'bg-blue-500/20 text-blue-400 border-blue-500/30' 
+              : 'bg-blue-50 text-blue-600 border-blue-200'
+          }`}>
+            <Factory className="w-5 h-5" />
+            <span className="font-medium">Manufacturer Registration</span>
+          </div>
+          
+          <h1 className={`text-5xl md:text-6xl font-bold mb-6 bg-gradient-to-r from-blue-500 to-blue-600 bg-clip-text text-transparent`}>
+            Register as Manufacturer
+          </h1>
+          
+          <p className={`text-xl max-w-2xl mx-auto ${
+            darkMode ? 'text-slate-300' : 'text-slate-600'
+          }`}>
+            Join the MedChain network as a verified medicine manufacturer
           </p>
-          {tx?.hash && (
-            <p style={{ margin: '4px 0 0 0', fontSize: '14px' }}>
-              Transaction: {tx.hash}
-            </p>
-          )}
         </div>
-      )}
-      
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 8, maxWidth: 400 }}>
-        <input 
-          name="manufacturerAddress" 
-          placeholder="Your Wallet Address (auto-filled)" 
-          value={form.manufacturerAddress} 
-          onChange={onChange}
-          disabled={!!address || isProcessing}
-          style={{ backgroundColor: address ? '#f5f5f5' : 'white' }}
-        />
-        <input 
-          name="name" 
-          placeholder="Company Name" 
-          value={form.name} 
-          onChange={onChange}
-          disabled={isProcessing}
-        />
-        <input 
-          name="license" 
-          placeholder="License Number" 
-          value={form.license} 
-          onChange={onChange}
-          disabled={isProcessing}
-        />
-        <input 
-          name="email" 
-          type="email"
-          placeholder="Company Email" 
-          value={form.email} 
-          onChange={onChange}
-          disabled={isProcessing}
-        />
-        
-        <button 
-          onClick={submit} 
-          disabled={isProcessing || !address}
-          style={{
-            backgroundColor: isProcessing ? '#ccc' : !address ? '#ccc' : '#007bff',
-            color: 'white',
-            cursor: isProcessing || !address ? 'not-allowed' : 'pointer',
-            padding: '12px'
-          }}
-        >
-          {isProcessing ? getStatusMessage() : 'Register as Manufacturer'}
-        </button>
-        
-        {!address && (
-          <p style={{ color: '#dc3545', fontSize: '14px' }}>
-            Please connect your wallet first
-          </p>
-        )}
+
+        {/* Process Guide */}
+        <div className={`p-10 rounded-3xl border-2 mb-12 ${
+          darkMode
+            ? 'bg-gradient-to-br from-blue-500/10 to-blue-600/10 border-blue-500/30 backdrop-blur-sm'
+            : 'bg-gradient-to-br from-blue-50 to-blue-100 border-blue-200'
+        }`}>
+          <div className="flex items-center gap-4 mb-8">
+            <Info className="w-10 h-10 text-blue-500" />
+            <h2 className={`text-3xl font-bold ${
+              darkMode ? 'text-white' : 'text-slate-900'
+            }`}>
+              Self-Registration Process
+            </h2>
+          </div>
+          
+          <div className="grid grid-cols-1 md:grid-cols-5 gap-6">
+            {[
+              { step: '1', icon: FileText, text: 'Fill out company details' },
+              { step: '2', icon: Zap, text: 'Submit registration transaction' },
+              { step: '3', icon: Clock, text: 'Wait for blockchain confirmation' },
+              { step: '4', icon: Shield, text: 'Wait for admin verification' },
+              { step: '5', icon: CheckCircle2, text: 'Start registering batches' },
+            ].map((item, index) => (
+              <div key={index} className="text-center">
+                <div className={`w-16 h-16 mx-auto rounded-full flex items-center justify-center mb-4 ${
+                  darkMode ? 'bg-blue-500/20' : 'bg-blue-100'
+                }`}>
+                  <item.icon className="w-8 h-8 text-blue-500" />
+                </div>
+                <div className={`w-8 h-8 mx-auto rounded-full flex items-center justify-center text-sm font-bold mb-3 ${
+                  darkMode ? 'bg-blue-500 text-white' : 'bg-blue-500 text-white'
+                }`}>
+                  {item.step}
+                </div>
+                <p className={`text-sm font-semibold ${
+                  darkMode ? 'text-slate-300' : 'text-slate-600'
+                }`}>
+                  {item.text}
+                </p>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+          {/* Main Registration Form */}
+          <div className="lg:col-span-2">
+            {/* Status Display */}
+            {status !== 'idle' && (
+              <div className={`p-8 rounded-3xl border-2 mb-8 ${
+                status === 'success' 
+                  ? (darkMode ? 'bg-emerald-500/10 border-emerald-500/30' : 'bg-emerald-50 border-emerald-200')
+                  : status === 'error' 
+                    ? (darkMode ? 'bg-red-500/10 border-red-500/30' : 'bg-red-50 border-red-200')
+                    : (darkMode ? 'bg-amber-500/10 border-amber-500/30' : 'bg-amber-50 border-amber-200')
+              }`}>
+                <div className="flex items-center gap-4">
+                  {getStatusIcon()}
+                  <div>
+                    <p className={`text-xl font-bold ${
+                      status === 'success' ? 'text-emerald-500' :
+                      status === 'error' ? 'text-red-500' :
+                      'text-amber-500'
+                    }`}>
+                      {getStatusMessage()}
+                    </p>
+                    {tx?.hash && (
+                      <p className={`mt-2 font-mono text-sm ${
+                        darkMode ? 'text-slate-300' : 'text-slate-600'
+                      }`}>
+                        Transaction: {tx.hash}
+                      </p>
+                    )}
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Registration Form */}
+            <div className={`p-10 rounded-3xl border ${
+              darkMode
+                ? 'bg-slate-800/60 border-slate-700'
+                : 'bg-slate-50 border-slate-200'
+            }`}>
+              <div className="flex items-center gap-4 mb-8">
+                <FileText className={`w-8 h-8 ${darkMode ? 'text-emerald-400' : 'text-emerald-600'}`} />
+                <h2 className={`text-2xl font-bold ${
+                  darkMode ? 'text-white' : 'text-slate-900'
+                }`}>
+                  Company Information
+                </h2>
+              </div>
+              
+              <div className="space-y-6">
+                <div>
+                  <label className={`block text-sm font-bold mb-3 ${
+                    darkMode ? 'text-slate-300' : 'text-slate-700'
+                  }`}>
+                    <Wallet className="w-4 h-4 inline mr-2" />
+                    Wallet Address
+                  </label>
+                  <input 
+                    name="manufacturerAddress" 
+                    placeholder="Your Wallet Address (auto-filled)" 
+                    value={form.manufacturerAddress} 
+                    onChange={onChange}
+                    disabled={!!address || isProcessing}
+                    className={`w-full px-6 py-4 rounded-2xl font-mono transition-all duration-300 ${
+                      (!!address || isProcessing)
+                        ? (darkMode
+                            ? 'bg-slate-800 border-slate-700 text-slate-400 cursor-not-allowed'
+                            : 'bg-slate-100 border-slate-300 text-slate-500 cursor-not-allowed')
+                        : (darkMode
+                            ? 'bg-slate-700 border-slate-600 text-white placeholder-slate-400 focus:border-emerald-500'
+                            : 'bg-white border-slate-300 text-slate-900 placeholder-slate-500 focus:border-emerald-500')
+                    } border focus:outline-none focus:ring-2 focus:ring-emerald-500/20`}
+                  />
+                </div>
+                
+                <div>
+                  <label className={`block text-sm font-bold mb-3 ${
+                    darkMode ? 'text-slate-300' : 'text-slate-700'
+                  }`}>
+                    <Factory className="w-4 h-4 inline mr-2" />
+                    Company Name
+                  </label>
+                  <input 
+                    name="name" 
+                    placeholder="e.g., MedCorp Industries" 
+                    value={form.name} 
+                    onChange={onChange}
+                    disabled={isProcessing}
+                    className={`w-full px-6 py-4 rounded-2xl font-medium transition-all duration-300 ${
+                      darkMode
+                        ? 'bg-slate-700 border-slate-600 text-white placeholder-slate-400 focus:border-emerald-500 disabled:bg-slate-800 disabled:text-slate-500'
+                        : 'bg-white border-slate-300 text-slate-900 placeholder-slate-500 focus:border-emerald-500 disabled:bg-slate-100 disabled:text-slate-400'
+                    } border focus:outline-none focus:ring-2 focus:ring-emerald-500/20`}
+                  />
+                </div>
+                
+                <div>
+                  <label className={`block text-sm font-bold mb-3 ${
+                    darkMode ? 'text-slate-300' : 'text-slate-700'
+                  }`}>
+                    <Award className="w-4 h-4 inline mr-2" />
+                    License Number
+                  </label>
+                  <input 
+                    name="license" 
+                    placeholder="e.g., FDA-MFG-2024-001" 
+                    value={form.license} 
+                    onChange={onChange}
+                    disabled={isProcessing}
+                    className={`w-full px-6 py-4 rounded-2xl font-medium transition-all duration-300 ${
+                      darkMode
+                        ? 'bg-slate-700 border-slate-600 text-white placeholder-slate-400 focus:border-emerald-500 disabled:bg-slate-800 disabled:text-slate-500'
+                        : 'bg-white border-slate-300 text-slate-900 placeholder-slate-500 focus:border-emerald-500 disabled:bg-slate-100 disabled:text-slate-400'
+                    } border focus:outline-none focus:ring-2 focus:ring-emerald-500/20`}
+                  />
+                </div>
+                
+                <div>
+                  <label className={`block text-sm font-bold mb-3 ${
+                    darkMode ? 'text-slate-300' : 'text-slate-700'
+                  }`}>
+                    <Mail className="w-4 h-4 inline mr-2" />
+                    Company Email
+                  </label>
+                  <input 
+                    name="email" 
+                    type="email"
+                    placeholder="contact@medcorp.com" 
+                    value={form.email} 
+                    onChange={onChange}
+                    disabled={isProcessing}
+                    className={`w-full px-6 py-4 rounded-2xl font-medium transition-all duration-300 ${
+                      darkMode
+                        ? 'bg-slate-700 border-slate-600 text-white placeholder-slate-400 focus:border-emerald-500 disabled:bg-slate-800 disabled:text-slate-500'
+                        : 'bg-white border-slate-300 text-slate-900 placeholder-slate-500 focus:border-emerald-500 disabled:bg-slate-100 disabled:text-slate-400'
+                    } border focus:outline-none focus:ring-2 focus:ring-emerald-500/20`}
+                  />
+                </div>
+                
+                <div className="pt-4">
+                  <button 
+                    onClick={submit} 
+                    disabled={isProcessing || !address}
+                    className={`w-full px-8 py-6 rounded-2xl font-bold text-lg transition-all duration-300 hover:scale-105 flex items-center justify-center gap-4 ${
+                      (isProcessing || !address)
+                        ? (darkMode ? 'bg-slate-600 text-slate-400 cursor-not-allowed' : 'bg-slate-300 text-slate-500 cursor-not-allowed')
+                        : (darkMode
+                            ? 'bg-gradient-to-r from-emerald-500 to-emerald-600 text-white hover:from-emerald-600 hover:to-emerald-700 shadow-lg shadow-emerald-500/25'
+                            : 'bg-gradient-to-r from-emerald-500 to-emerald-600 text-white hover:from-emerald-600 hover:to-emerald-700 shadow-lg shadow-emerald-500/25')
+                    }`}
+                  >
+                    {getStatusIcon()}
+                    {isProcessing ? getStatusMessage() : 'Register as Manufacturer'}
+                    {!isProcessing && <ArrowRight className="w-5 h-5" />}
+                  </button>
+                  
+                  {!address && (
+                    <p className={`mt-4 text-center font-semibold ${
+                      darkMode ? 'text-red-400' : 'text-red-600'
+                    }`}>
+                      Please connect your wallet first
+                    </p>
+                  )}
+                </div>
+              </div>
+            </div>
+
+            {/* Error Display */}
+            {err && (
+              <div className={`p-8 rounded-3xl border-2 mt-8 ${
+                darkMode 
+                  ? 'bg-red-500/10 border-red-500/30' 
+                  : 'bg-red-50 border-red-200'
+              }`}>
+                <div className="flex items-start gap-4">
+                  <AlertTriangle className="w-8 h-8 text-red-500 flex-shrink-0" />
+                  <div>
+                    <h4 className={`text-xl font-bold mb-2 ${
+                      darkMode ? 'text-red-400' : 'text-red-600'
+                    }`}>
+                      Registration Error
+                    </h4>
+                    <p className={darkMode ? 'text-slate-300' : 'text-slate-600'}>
+                      {err}
+                    </p>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Success Details */}
+            {status === 'success' && tx && (
+              <div className={`p-10 rounded-3xl border-2 mt-8 ${
+                darkMode
+                  ? 'bg-emerald-500/10 border-emerald-500/30'
+                  : 'bg-emerald-50 border-emerald-200'
+              }`}>
+                <div className="flex items-center gap-4 mb-8">
+                  <CheckCircle2 className="w-10 h-10 text-emerald-500" />
+                  <h4 className={`text-3xl font-bold ${
+                    darkMode ? 'text-emerald-400' : 'text-emerald-600'
+                  }`}>
+                    Registration Submitted Successfully!
+                  </h4>
+                </div>
+                
+                <div className={`p-8 rounded-2xl mb-6 ${
+                  darkMode ? 'bg-slate-700/60' : 'bg-white'
+                }`}>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                      <p className={`text-sm font-bold mb-2 ${
+                        darkMode ? 'text-slate-400' : 'text-slate-500'
+                      }`}>
+                        Company
+                      </p>
+                      <p className={`text-lg font-bold ${
+                        darkMode ? 'text-white' : 'text-slate-900'
+                      }`}>
+                        {form.name}
+                      </p>
+                    </div>
+                    <div>
+                      <p className={`text-sm font-bold mb-2 ${
+                        darkMode ? 'text-slate-400' : 'text-slate-500'
+                      }`}>
+                        License
+                      </p>
+                      <p className={`text-lg font-bold ${
+                        darkMode ? 'text-white' : 'text-slate-900'
+                      }`}>
+                        {form.license}
+                      </p>
+                    </div>
+                    <div>
+                      <p className={`text-sm font-bold mb-2 ${
+                        darkMode ? 'text-slate-400' : 'text-slate-500'
+                      }`}>
+                        Email
+                      </p>
+                      <p className={`text-lg font-bold ${
+                        darkMode ? 'text-white' : 'text-slate-900'
+                      }`}>
+                        {form.email}
+                      </p>
+                    </div>
+                    <div>
+                      <p className={`text-sm font-bold mb-2 ${
+                        darkMode ? 'text-slate-400' : 'text-slate-500'
+                      }`}>
+                        Block Number
+                      </p>
+                      <p className={`text-lg font-bold ${
+                        darkMode ? 'text-white' : 'text-slate-900'
+                      }`}>
+                        {tx.blockNumber}
+                      </p>
+                    </div>
+                    <div className="md:col-span-2">
+                      <p className={`text-sm font-bold mb-2 ${
+                        darkMode ? 'text-slate-400' : 'text-slate-500'
+                      }`}>
+                        Transaction Hash
+                      </p>
+                      <p className={`text-sm font-mono break-all ${
+                        darkMode ? 'text-white' : 'text-slate-900'
+                      }`}>
+                        {tx.hash}
+                      </p>
+                    </div>
+                    {tx.gasUsed && (
+                      <div>
+                        <p className={`text-sm font-bold mb-2 ${
+                          darkMode ? 'text-slate-400' : 'text-slate-500'
+                        }`}>
+                          Gas Used
+                        </p>
+                        <p className={`text-lg font-bold ${
+                          darkMode ? 'text-white' : 'text-slate-900'
+                        }`}>
+                          {tx.gasUsed}
+                        </p>
+                      </div>
+                    )}
+                  </div>
+                </div>
+                
+                <div className={`p-8 rounded-2xl border ${
+                  darkMode
+                    ? 'bg-amber-500/10 border-amber-500/30'
+                    : 'bg-amber-50 border-amber-200'
+                }`}>
+                  <div className="flex items-start gap-4">
+                    <Clock className="w-6 h-6 text-amber-500 flex-shrink-0 mt-1" />
+                    <div>
+                      <p className={`font-bold text-amber-500 mb-2`}>
+                        Next Step
+                      </p>
+                      <p className={`${darkMode ? 'text-slate-300' : 'text-slate-600'}`}>
+                        Your registration is confirmed on the blockchain. Wait for admin verification 
+                        before you can register medicine batches.
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
+          </div>
+
+          {/* Sidebar - Help & Info */}
+          <div className="space-y-8">
+            <div className={`p-8 rounded-3xl border ${
+              darkMode
+                ? 'bg-slate-800/60 border-slate-700'
+                : 'bg-slate-50 border-slate-200'
+            }`}>
+              <div className="flex items-center gap-3 mb-6">
+                <Shield className={`w-8 h-8 ${darkMode ? 'text-cyan-400' : 'text-cyan-600'}`} />
+                <h3 className={`text-xl font-bold ${
+                  darkMode ? 'text-white' : 'text-slate-900'
+                }`}>
+                  Why Register?
+                </h3>
+              </div>
+              
+              <div className="space-y-4">
+                {[
+                  { icon: CheckCircle2, text: 'Register medicine batches' },
+                  { icon: Shield, text: 'Build trust with consumers' },
+                  { icon: FileText, text: 'Comply with regulations' },
+                  { icon: Zap, text: 'Enable blockchain verification' },
+                ].map((item, index) => (
+                  <div key={index} className="flex items-center gap-3">
+                    <item.icon className="w-5 h-5 text-emerald-500" />
+                    <p className={`${darkMode ? 'text-slate-300' : 'text-slate-600'}`}>
+                      {item.text}
+                    </p>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            <div className={`p-8 rounded-3xl border ${
+              darkMode
+                ? 'bg-blue-500/10 border-blue-500/30'
+                : 'bg-blue-50 border-blue-200'
+            }`}>
+              <div className="flex items-center gap-3 mb-6">
+                <AlertCircle className="w-8 h-8 text-blue-500" />
+                <h3 className={`text-xl font-bold ${
+                  darkMode ? 'text-white' : 'text-slate-900'
+                }`}>
+                  Important Notes
+                </h3>
+              </div>
+              
+              <div className="space-y-4">
+                <p className={`text-sm ${darkMode ? 'text-slate-300' : 'text-slate-600'}`}>
+                  • Ensure all information is accurate
+                </p>
+                <p className={`text-sm ${darkMode ? 'text-slate-300' : 'text-slate-600'}`}>
+                  • Your license number will be verified
+                </p>
+                <p className={`text-sm ${darkMode ? 'text-slate-300' : 'text-slate-600'}`}>
+                  • Registration requires blockchain transaction
+                </p>
+                <p className={`text-sm ${darkMode ? 'text-slate-300' : 'text-slate-600'}`}>
+                  • Admin approval needed before batch registration
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
-      
-      {err && (
-        <div style={{ 
-          color: '#721c24', 
-          backgroundColor: '#f8d7da',
-          border: '1px solid #f5c6cb',
-          padding: 12,
-          borderRadius: 4,
-          marginTop: 16
-        }}>
-          <strong>Error:</strong> {err}
-        </div>
-      )}
-      
-      {/* Success Details */}
-      {status === 'success' && tx && (
-        <div style={{ 
-          marginTop: 16,
-          padding: 12,
-          backgroundColor: '#d4edda',
-          border: '1px solid #c3e6cb',
-          borderRadius: 4
-        }}>
-          <h4 style={{ color: '#155724', margin: '0 0 12px 0' }}>
-            ✅ Registration Submitted Successfully!
-          </h4>
-          <div style={{ fontSize: '14px', color: '#155724' }}>
-            <p><strong>Company:</strong> {form.name}</p>
-            <p><strong>License:</strong> {form.license}</p>
-            <p><strong>Email:</strong> {form.email}</p>
-            <p><strong>Transaction Hash:</strong> {tx.hash}</p>
-            <p><strong>Block Number:</strong> {tx.blockNumber}</p>
-            {tx.gasUsed && <p><strong>Gas Used:</strong> {tx.gasUsed}</p>}
-          </div>
-          <div style={{ 
-            marginTop: 8, 
-            padding: 8, 
-            backgroundColor: '#fff3cd', 
-            border: '1px solid #ffeaa7',
-            borderRadius: 4 
-          }}>
-            <p style={{ margin: 0, color: '#856404' }}>
-              <strong>Next Step:</strong> Your registration is confirmed on the blockchain. 
-              Wait for admin verification before you can register medicine batches.
-            </p>
-          </div>
-        </div>
-      )}
     </div>
   );
 }

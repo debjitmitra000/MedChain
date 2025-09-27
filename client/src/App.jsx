@@ -5,9 +5,40 @@ import WalletConnect from './components/WalletConnect.jsx';
 import { Shield, User, Building } from 'lucide-react';
 import ErrorBoundary from './components/ErrorBoundary.jsx';
 import { ToastProvider } from './components/Toast.jsx';
+import React, { useState, useEffect } from "react";
+import { Outlet, Link, NavLink, useLocation } from "react-router-dom";
+import { useRole } from "./hooks/useRole";
+import { useTheme } from "./contexts/ThemeContext"; // Add this import
+import WalletConnect from "./components/WalletConnect.jsx";
+import {
+  Shield,
+  User,
+  Building,
+  Menu,
+  X,
+  Sun,
+  Moon,
+  Home,
+  Search,
+  Factory,
+  Settings,
+  Package,
+  UserPlus,
+  BarChart3,
+  CheckCircle2,
+  Clock,
+  ChevronDown,
+  Wallet,
+  LogOut,
+} from "lucide-react";
+import ErrorBoundary from "./components/ErrorBoundary.jsx";
 
 export default function App() {
   const location = useLocation();
+  const { darkMode, toggleTheme } = useTheme(); // Use shared theme context
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [userMenuOpen, setUserMenuOpen] = useState(false);
+
   const {
     role,
     isAdmin,
@@ -19,109 +50,308 @@ export default function App() {
     canRegisterAsManufacturer,
   } = useRole();
 
-  // If we're on the home page, show the landing page
-  if (location.pathname === '/') {
-    return <LandingPage />;
+  const toggleMobileMenu = () => {
+    setMobileMenuOpen(!mobileMenuOpen);
+  };
+
+  const closeMobileMenu = () => {
+    setMobileMenuOpen(false);
+  };
+
+  // Close mobile menu when route changes
+  useEffect(() => {
+    setMobileMenuOpen(false);
+    setUserMenuOpen(false);
+  }, [location.pathname]);
+
+  // Enhanced nav link styling function
+  const navLinkClassName = ({ isActive }) => {
+    const baseClasses =
+      "flex items-center gap-2 px-4 py-2.5 rounded-xl font-medium transition-all duration-300 relative";
+
+    if (isActive) {
+      return `${baseClasses} ${
+        darkMode
+          ? "bg-gradient-to-r from-emerald-500 to-emerald-600 text-white shadow-lg shadow-emerald-500/25"
+          : "bg-gradient-to-r from-emerald-500 to-emerald-600 text-white shadow-lg shadow-emerald-500/25"
+      } transform scale-105`;
+    }
+
+    return `${baseClasses} ${
+      darkMode
+        ? "text-slate-300 hover:text-white hover:bg-slate-700/60 hover:scale-105"
+        : "text-slate-600 hover:text-slate-900 hover:bg-slate-100 hover:scale-105"
+    }`;
+  };
+
+  // Mobile nav link styling
+  const mobileNavLinkClassName = ({ isActive }) => {
+    const baseClasses =
+      "flex items-center gap-3 px-6 py-4 rounded-xl font-medium transition-all duration-300";
+
+    if (isActive) {
+      return `${baseClasses} ${
+        darkMode
+          ? "bg-gradient-to-r from-emerald-500 to-emerald-600 text-white"
+          : "bg-gradient-to-r from-emerald-500 to-emerald-600 text-white"
+      }`;
+    }
+
+    return `${baseClasses} ${
+      darkMode
+        ? "text-slate-300 hover:text-white hover:bg-slate-700/60"
+        : "text-slate-600 hover:text-slate-900 hover:bg-slate-100"
+    }`;
+  };
+
+  const getNavigationItems = () => {
+  const items = [];
+
+  if (isAdmin) {
+    items.push(
+      { to: "/admin", icon: Settings, label: "Admin Dashboard" },
+      { to: "/verify", icon: Search, label: "Verify" },
+      { to: "/manufacturer/list", icon: Factory, label: "Manufacturers" },
+    );
+  } else if (isManufacturer) {
+    items.push(
+      { to: "/manufacturer/me", icon: User, label: "My Profile", end: true }, // Add end: true here
+      { to: "/verify", icon: Search, label: "Verify" },
+      { to: "/manufacturer/me/batches", icon: Package, label: "My Batches" },
+    );
+
+    if (canRegisterBatch) {
+      items.splice(3, 0, {
+        to: "/batch/register",
+        icon: UserPlus,
+        label: "Register Batch",
+      });
+    }
+  } else {
+    items.push(
+      { to: "/home", icon: Home, label: "User Dashboard" }, // Updated to /home
+      { to: "/verify", icon: Search, label: "Verify" },
+      { to: "/manufacturer/list", icon: Factory, label: "Manufacturers" }
+    );
+
+    if (canRegisterAsManufacturer && isConnected) {
+      items.push({
+        to: "/manufacturer/register",
+        icon: UserPlus,
+        label: "Register as Manufacturer",
+      });
+    }
   }
 
-  // This function adds styling to the currently active navigation link
-  const navLinkClassName = ({ isActive }) =>
-    isActive
-      ? 'text-white font-semibold bg-gradient-to-r from-indigo-500 to-purple-600 px-4 py-2 rounded-lg shadow-md transform scale-105 transition-all duration-200 whitespace-nowrap'
-      : 'text-gray-700 font-medium hover:text-indigo-600 hover:bg-gradient-to-r hover:from-indigo-50 hover:to-purple-50 px-4 py-2 rounded-lg transition-all duration-200 whitespace-nowrap hover:shadow-sm hover:scale-105';
+  return items;
+};
 
-  const renderNavigation = () => {
-    // We use NavLink instead of Link to style the active page
+const renderNavigation = () => {
+  return getNavigationItems().map((item) => (
+    <NavLink
+      key={item.to}
+      to={item.to}
+      end={item.end} // Add this prop
+      className={navLinkClassName}
+      onClick={closeMobileMenu}
+    >
+      <item.icon className="w-4 h-4" />
+      <span className="whitespace-nowrap">{item.label}</span>
+    </NavLink>
+  ));
+};
+
+const renderMobileNavigation = () => {
+  return getNavigationItems().map((item) => (
+    <NavLink
+      key={item.to}
+      to={item.to}
+      end={item.end} // Add this prop here too
+      className={mobileNavLinkClassName}
+      onClick={closeMobileMenu}
+    >
+      <item.icon className="w-5 h-5" />
+      <span>{item.label}</span>
+    </NavLink>
+  ));
+};
+
+  const getRoleInfo = () => {
     if (isAdmin) {
-      return (
-        <>
-          <NavLink to="/" className={navLinkClassName}>Home</NavLink>
-          <NavLink to="/verify" className={navLinkClassName}>Verify</NavLink>
-          <NavLink to="/manufacturer/list" className={navLinkClassName}>Manufacturers</NavLink>
-          <NavLink to="/admin" className={navLinkClassName}>Admin Dashboard</NavLink>
-        </>
-      );
+      return {
+        text: "Admin",
+        icon: Shield,
+        color: darkMode ? "text-purple-400" : "text-purple-600",
+        bgColor: darkMode
+          ? "bg-purple-500/20 border-purple-500/30"
+          : "bg-purple-50 border-purple-200",
+      };
     }
 
     if (isManufacturer) {
-      return (
-        <>
-          <NavLink to="/" className={navLinkClassName}>Home</NavLink>
-          <NavLink to="/verify" className={navLinkClassName}>Verify</NavLink>
-          <NavLink to="/manufacturer/me/batches" className={navLinkClassName}>My Batches</NavLink>
-          {canRegisterBatch && (
-            <NavLink to="/batch/register" className={navLinkClassName}>Register Batch</NavLink>
-          )}
-          <NavLink to="/manufacturer/me" className={navLinkClassName}>My Profile</NavLink>
-        </>
-      );
-    }
-
-    // Default User navigation
-    return (
-      <>
-        <NavLink to="/" className={navLinkClassName}>Home</NavLink>
-        <NavLink to="/verify" className={navLinkClassName}>Verify</NavLink>
-        <NavLink to="/manufacturer/list" className={navLinkClassName}>Manufacturers</NavLink>
-        {canRegisterAsManufacturer && isConnected && (
-            <NavLink to="/manufacturer/register" className={navLinkClassName}>Register as Manufacturer</NavLink>
-        )}
-      </>
-    );
-  };
-
-  const renderUserInfo = () => {
-    if (!isConnected) return null;
-
-    let roleInfo = { text: 'User', icon: User, color: 'text-gray-500', bgColor: 'bg-gray-100' };
-    if (isAdmin) {
-      roleInfo = { text: 'Admin', icon: Shield, color: 'text-red-600', bgColor: 'bg-red-50' };
-    } else if (isManufacturer) {
-      roleInfo = { 
-        text: `Manufacturer ${manufacturer?.isVerified ? '' : '(Pending)'}`, 
-        icon: Building, 
-        color: manufacturer?.isVerified ? 'text-blue-600' : 'text-orange-600',
-        bgColor: manufacturer?.isVerified ? 'bg-blue-50' : 'bg-orange-50'
+      return {
+        text: manufacturer?.isVerified
+          ? "Verified Manufacturer"
+          : "Pending Manufacturer",
+        icon: Building,
+        color: manufacturer?.isVerified
+          ? darkMode
+            ? "text-emerald-400"
+            : "text-emerald-600"
+          : darkMode
+          ? "text-amber-400"
+          : "text-amber-600",
+        bgColor: manufacturer?.isVerified
+          ? darkMode
+            ? "bg-emerald-500/20 border-emerald-500/30"
+            : "bg-emerald-50 border-emerald-200"
+          : darkMode
+          ? "bg-amber-500/20 border-amber-500/30"
+          : "bg-amber-50 border-amber-200",
       };
     }
-    const RoleIcon = roleInfo.icon;
 
-    return (
-      <div className={`flex items-center gap-2 text-xs md:text-sm font-medium text-gray-700 ${roleInfo.bgColor} px-2 py-1 rounded-md border`}>
-        <RoleIcon className={`h-4 w-4 ${roleInfo.color}`} />
-        <span className={`${roleInfo.color} hidden sm:inline`}>{roleInfo.text}</span>
-        <span className="text-gray-400 hidden md:inline">|</span>
-        <span className="font-mono text-xs">{address?.slice(0, 6)}...{address?.slice(-4)}</span>
-      </div>
-    );
+    return {
+      text: "User",
+      icon: User,
+      color: darkMode ? "text-slate-400" : "text-slate-600",
+      bgColor: darkMode
+        ? "bg-slate-500/20 border-slate-500/30"
+        : "bg-slate-100 border-slate-300",
+    };
   };
+  const roleInfo = getRoleInfo();
+  const RoleIcon = roleInfo.icon;
 
   return (
-    <ToastProvider>
-      <div className="min-h-screen bg-gray-50">
-        {/* HEADER / NAVIGATION BAR */}
-        <header className="bg-white shadow-md sticky top-0 z-10">
-          <nav className="container mx-auto px-4 py-3 flex justify-between items-center">
-            {/* Left Side: Logo and Navigation Links */}
-            <div className="flex items-center gap-4 md:gap-8">
-              <Link to="/" className="text-xl md:text-2xl font-bold text-indigo-600 flex items-center gap-2">
-                <Shield className="h-6 w-6 md:h-8 md:w-8" />
-                <span className="hidden sm:inline">MedChain</span>
-                <span className="sm:hidden">MC</span>
+    <ErrorBoundary>
+      <div
+        className={`min-h-screen font-sans transition-colors duration-500 ${
+          darkMode ? "bg-slate-950 text-white" : "bg-slate-50 text-slate-900"
+        }`}
+      >
+        {/* Modern Header */}
+        <header
+          className={`sticky top-0 z-50 backdrop-blur-xl border-b transition-all duration-500 ${
+            darkMode
+              ? "bg-slate-900/80 border-slate-800"
+              : "bg-white/80 border-slate-200"
+          }`}
+        >
+          <nav className="max-w-7xl mx-auto px-6">
+            <div className="flex items-center justify-between h-20">
+              {/* Logo Section - Updated to go to landing page */}
+              <Link
+                to="/"
+                className={`flex items-center gap-3 text-2xl font-bold transition-all duration-300 hover:scale-105 ${
+                  darkMode ? "text-white" : "text-slate-900"
+                }`}
+              >
+                <span className="bg-gradient-to-r from-emerald-500 to-emerald-600 bg-clip-text text-transparent">
+                  MedChain
+                </span>
               </Link>
-              <div className="hidden lg:flex items-center gap-6">
+
+              {/* Desktop Navigation */}
+              <div className="hidden lg:flex items-center gap-2">
                 {renderNavigation()}
               </div>
-            </div>
 
-            {/* Right Side: User Info and Wallet Button */}
-            <div className="flex items-center gap-2 md:gap-4">
-              <div className="hidden md:block">
-                {renderUserInfo()}
+              {/* Right Side Actions */}
+              <div className="flex items-center gap-4">
+                {/* Theme Toggle */}
+                <button
+                  onClick={toggleTheme}
+                  className={`p-3 rounded-xl transition-all duration-300 hover:scale-105 ${
+                    darkMode
+                      ? "bg-slate-800 hover:bg-slate-700 text-cyan-400"
+                      : "bg-white hover:bg-slate-50 text-slate-700 shadow-lg"
+                  }`}
+                >
+                  {darkMode ? <Sun size={20} /> : <Moon size={20} />}
+                </button>
+
+                {/* User Info - Desktop */}
+                {isConnected && (
+                  <div className="hidden md:block relative">
+                    <button
+                      onClick={() => setUserMenuOpen(!userMenuOpen)}
+                      className={`flex items-center gap-3 px-4 py-2.5 rounded-xl font-medium transition-all duration-300 hover:scale-105 border ${roleInfo.bgColor}`}
+                    >
+                      <RoleIcon className={`w-4 h-4 ${roleInfo.color}`} />
+                      <div className="text-left">
+                        <div
+                          className={`text-sm font-semibold ${roleInfo.color}`}
+                        >
+                          {roleInfo.text}
+                        </div>
+                      </div>
+                    </button>
+                  </div>
+                )}
+
+                {/* Wallet Connect */}
+                <WalletConnect darkMode={darkMode} />
+
+                {/* Mobile Menu Button */}
+                <button
+                  onClick={toggleMobileMenu}
+                  className={`lg:hidden p-3 rounded-xl transition-all duration-300 hover:scale-105 ${
+                    darkMode
+                      ? "bg-slate-800 hover:bg-slate-700 text-white"
+                      : "bg-white hover:bg-slate-50 text-slate-900 shadow-lg"
+                  }`}
+                >
+                  {mobileMenuOpen ? <X size={20} /> : <Menu size={20} />}
+                </button>
+              </div>
+            </div>
+          </nav>
+
+          {/* Mobile Navigation Menu */}
+          <div
+            className={`lg:hidden transition-all duration-500 ease-in-out overflow-hidden ${
+              mobileMenuOpen ? "max-h-screen opacity-100" : "max-h-0 opacity-0"
+            }`}
+          >
+            <div
+              className={`border-t ${
+                darkMode ? "border-slate-800" : "border-slate-200"
+              }`}
+            >
+              <div className="px-6 py-6 space-y-2">
+                {renderMobileNavigation()}
+
+                {/* Mobile User Info */}
+                {isConnected && (
+                  <div
+                    className={`mt-6 pt-6 border-t ${
+                      darkMode ? "border-slate-800" : "border-slate-200"
+                    }`}
+                  >
+                    <div
+                      className={`flex items-center gap-3 px-6 py-4 rounded-xl border ${roleInfo.bgColor}`}
+                    >
+                      <RoleIcon className={`w-5 h-5 ${roleInfo.color}`} />
+                      <div>
+                        <div className={`font-semibold ${roleInfo.color}`}>
+                          {roleInfo.text}
+                        </div>
+                        <div
+                          className={`text-sm font-mono ${
+                            darkMode ? "text-slate-400" : "text-slate-500"
+                          }`}
+                        >
+                          {address?.slice(0, 10)}...{address?.slice(-8)}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                )}
               </div>
               <WalletConnect />
             </div>
-          </nav>
+          </div>
           
           {/* Mobile Navigation */}
           <div className="lg:hidden border-t border-gray-200 bg-white">
@@ -137,12 +367,36 @@ export default function App() {
             </div>
           </div>
         </header>
+        {/* Floating Geometric Shapes Background */}
+        <div className="fixed inset-0 overflow-hidden pointer-events-none">
+          <div className="absolute top-20 left-10 w-16 h-16 bg-emerald-500/5 rounded-full animate-pulse"></div>
+          <div
+            className="absolute top-40 right-20 w-8 h-8 bg-blue-500/10 rotate-45 animate-spin"
+            style={{ animationDuration: "8s" }}
+          ></div>
+          <div
+            className="absolute bottom-32 left-20 w-12 h-12 bg-purple-500/5 rounded-full animate-bounce"
+            style={{ animationDelay: "1s" }}
+          ></div>
+          <div
+            className="absolute bottom-40 right-10 w-6 h-6 bg-amber-500/10 rotate-12 animate-pulse"
+            style={{ animationDelay: "2s" }}
+          ></div>
+        </div>
 
-        {/* MAIN CONTENT AREA */}
-        <main className="container mx-auto p-4 md:p-6">
+        {/* Main Content Area */}
+        <main className="relative max-w-7xl mx-auto px-6 py-8">
           <Outlet />
         </main>
+
+        {/* Overlay for mobile menu */}
+        {mobileMenuOpen && (
+          <div
+            className="lg:hidden fixed inset-0 bg-black/20 backdrop-blur-sm z-40"
+            onClick={closeMobileMenu}
+          />
+        )}
       </div>
-    </ToastProvider>
+    </ErrorBoundary>
   );
 }
