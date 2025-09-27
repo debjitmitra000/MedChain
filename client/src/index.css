@@ -1,0 +1,328 @@
+/* Base Global Styles */
+html, body, #root { 
+  height: 100%; 
+  margin: 0; 
+  font-family: system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, Cantarell, Noto Sans, sans-serif; 
+}
+
+/* Form Elements */
+button, input { 
+  font: inherit; 
+  padding: 8px 12px; 
+  margin: 4px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+}
+
+button {
+  background: #007bff;
+  color: white;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+button:hover {
+  background: #0056b3;
+}
+
+button:disabled {
+  background: #ccc;
+  cursor: not-allowed;
+}
+
+/* Navigation */
+nav a { 
+  text-decoration: none; 
+  color: #007bff;
+  padding: 8px 12px;
+  border-radius: 4px;
+  transition: background-color 0.2s ease;
+}
+
+nav a:hover {
+  background: #f8f9fa;
+}
+
+/* Code blocks */
+pre {
+  background: #f8f9fa;
+  padding: 12px;
+  border-radius: 4px;
+  overflow: auto;
+  font-size: 12px;
+}
+
+/* QR Scanner Styles */
+#qr-reader {
+  border: 2px dashed #ccc;
+  border-radius: 8px;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+#qr-reader video {
+  border-radius: 8px;
+  max-width: 100%;
+  height: auto;
+}
+
+#qr-reader canvas {
+  border-radius: 8px;
+  max-width: 100%;
+  height: auto;
+}
+
+/* File Upload Styles */
+input[type="file"] {
+  padding: 8px;
+  border: 2px dashed #ccc;
+  border-radius: 4px;
+  background: #f9f9f9;
+  cursor: pointer;
+  width: 100%;
+  max-width: 400px;
+  transition: all 0.2s ease;
+}
+
+input[type="file"]:hover {
+  border-color: #0088aa;
+  background: #e6f2ff;
+}
+
+input[type="file"]:focus {
+  outline: none;
+  border-color: #007bff;
+  box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.25);
+}
+
+/* Scanner Container */
+.scanner-container {
+  position: relative;
+  overflow: hidden;
+  border-radius: 8px;
+}
+
+.scanner-overlay {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 250px;
+  height: 250px;
+  border: 3px solid #00aa00;
+  border-radius: 8px;
+  pointer-events: none;
+  z-index: 10;
+  box-shadow: inset 0 0 0 2px rgba(0, 170, 0, 0.3);
+}
+
+/* Status Colors */
+.status-valid {
+  color: #00aa00;
+  border-color: #00aa00;
+}
+
+.status-expired {
+  color: #ff8800;
+  border-color: #ff8800;
+}
+
+.status-recalled {
+  color: #ff4444;
+  border-color: #ff4444;
+}
+
+.status-fake {
+  color: #ff4444;
+  border-color: #ff4444;
+}
+
+/* Card Styles */
+.card {
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  padding: 16px;
+  margin: 8px 0;
+  background: #fff;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.card-header {
+  font-weight: bold;
+  margin-bottom: 8px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid #eee;
+}
+
+/* Admin Styles */
+.admin-badge {
+  background: #ff6600;
+  color: white;
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-size: 12px;
+  font-weight: bold;
+  margin-left: 8px;
+}
+
+.admin-section {
+  border: 2px solid #ff6600;
+  border-radius: 8px;
+  padding: 16px;
+  margin: 16px 0;
+  background: #fff8f0;
+}
+
+/* Verification Result Styles */
+.verification-result {
+  padding: 16px;
+  border-radius: 8px;
+  margin: 16px 0;
+  border-width: 2px;
+  border-style: solid;
+}
+
+.verification-result.valid {
+  background: #f0f8f0;
+  border-color: #00aa00;
+}
+
+.verification-result.expired {
+  background: #fff8f0;
+  border-color: #ff8800;
+}
+
+.verification-result.recalled,
+.verification-result.fake {
+  background: #fff0f0;
+  border-color: #ff4444;
+}
+
+/* Grid Layouts */
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 16px;
+  margin: 16px 0;
+}
+
+.manufacturer-grid {
+  display: grid;
+  gap: 12px;
+  margin: 16px 0;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  nav {
+    flex-direction: column;
+    gap: 8px;
+  }
+  
+  .stats-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  input[type="file"] {
+    max-width: 100%;
+  }
+  
+  #qr-reader {
+    max-width: 100%;
+  }
+}
+
+/* Loading States */
+.loading {
+  opacity: 0.7;
+  pointer-events: none;
+}
+
+.spinner {
+  display: inline-block;
+  width: 16px;
+  height: 16px;
+  border: 2px solid #ccc;
+  border-top: 2px solid #007bff;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin-right: 8px;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* Download Button */
+.download-btn {
+  background: #00aa00;
+  color: white;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 4px;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  transition: background-color 0.2s ease;
+}
+
+.download-btn:hover {
+  background: #008800;
+}
+
+/* Method Selection */
+.method-selector {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 16px;
+  flex-wrap: wrap;
+}
+
+.method-btn {
+  padding: 8px 16px;
+  border: 2px solid #ccc;
+  background: white;
+  color: #666;
+  cursor: pointer;
+  border-radius: 4px;
+  transition: all 0.2s ease;
+}
+
+.method-btn.active {
+  background: #0088aa;
+  color: white;
+  border-color: #0088aa;
+}
+
+.method-btn:hover {
+  border-color: #0088aa;
+}
+
+/* Batch Status Badges */
+.batch-status {
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 12px;
+  font-weight: bold;
+  color: white;
+}
+
+.batch-status.verified {
+  background: #00aa00;
+}
+
+.batch-status.unverified {
+  background: #ff8800;
+}
+
+.batch-status.recalled {
+  background: #ff4444;
+}
+
+.batch-status.expired {
+  background: #666;
+}

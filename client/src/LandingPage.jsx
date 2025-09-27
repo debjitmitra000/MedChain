@@ -21,16 +21,36 @@ import {
 export default function LandingPage() {
   const [darkMode, setDarkMode] = useState(true);
   const [scrollY, setScrollY] = useState(0);
+  const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
   const heroRef = useRef(null);
   const featuresRef = useRef(null);
   const statsRef = useRef(null);
   const aboutRef = useRef(null);
   const ctaRef = useRef(null);
+  const qrRef = useRef(null);
 
   useEffect(() => {
     const handleScroll = () => setScrollY(window.scrollY);
     window.addEventListener("scroll", handleScroll);
     return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
+
+  useEffect(() => {
+    const handleMouseMove = (e) => {
+      if (qrRef.current) {
+        const qrRect = qrRef.current.getBoundingClientRect();
+        const qrCenterX = qrRect.left + qrRect.width / 2;
+        const qrCenterY = qrRect.top + qrRect.height / 2;
+        
+        setMousePosition({
+          x: e.clientX - qrCenterX,
+          y: e.clientY - qrCenterY
+        });
+      }
+    };
+
+    window.addEventListener("mousemove", handleMouseMove);
+    return () => window.removeEventListener("mousemove", handleMouseMove);
   }, []);
 
   useEffect(() => {
@@ -80,6 +100,20 @@ export default function LandingPage() {
     document.getElementById(sectionId)?.scrollIntoView({ behavior: "smooth" });
   };
 
+  // Calculate eye movement based on mouse position
+  const getEyeMovement = (maxMovement = 8) => {
+    const distance = Math.sqrt(mousePosition.x ** 2 + mousePosition.y ** 2);
+    const maxDistance = 300; // Max distance to consider for eye movement
+    const normalizedDistance = Math.min(distance / maxDistance, 1);
+    
+    const eyeX = (mousePosition.x / maxDistance) * maxMovement * normalizedDistance;
+    const eyeY = (mousePosition.y / maxDistance) * maxMovement * normalizedDistance;
+    
+    return { x: eyeX, y: eyeY };
+  };
+
+  const eyeMovement = getEyeMovement();
+
   return (
     <div
       className={`min-h-screen font-sans overflow-x-hidden transition-colors duration-500 ${
@@ -112,7 +146,7 @@ export default function LandingPage() {
         />
       </div>
 
-      {/* Hero Section with Animated Capsule */}
+      {/* Hero Section with Animated Capsule and QR Character */}
       <section className="relative h-screen flex items-center justify-center overflow-hidden">
         {/* Animated Background */}
         <div className="absolute inset-0">
@@ -191,6 +225,81 @@ export default function LandingPage() {
 
         {/* Main Content */}
         <div className="relative w-full h-full flex items-center justify-center">
+          {/* Animated QR Code Character */}
+          <div 
+            ref={qrRef}
+            className="absolute top-[15%] left-1/2 transform -translate-x-1/2 z-10 animate-qrFloat"
+          >
+            <div className={`relative w-24 h-24 sm:w-28 sm:h-28 md:w-32 md:h-32 p-2 rounded-lg ${
+              darkMode ? "bg-white" : "bg-slate-900"
+            } shadow-lg hover:scale-110 transition-all duration-300`}>
+              {/* QR Code Pattern */}
+              <div className="w-full h-full grid grid-cols-8 gap-[1px]">
+                {/* Generate QR-like pattern */}
+                {Array.from({ length: 64 }, (_, i) => {
+                  const isCornerSquare = 
+                    (i < 21 && (i % 8) < 3) || // Top-left
+                    (i < 21 && (i % 8) > 4) || // Top-right
+                    (i > 42 && (i % 8) < 3); // Bottom-left
+                  const isRandomPattern = Math.random() > 0.4 && !isCornerSquare;
+                  
+                  return (
+                    <div
+                      key={i}
+                      className={`aspect-square ${
+                        isCornerSquare || isRandomPattern
+                          ? darkMode ? "bg-slate-900" : "bg-white"
+                          : darkMode ? "bg-white" : "bg-slate-900"
+                      }`}
+                    />
+                  );
+                })}
+              </div>
+              
+              {/* Animated Eyes */}
+              <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2">
+                {/* Left Eye */}
+                <div className="absolute -left-10 -top-4">
+                  <div className={`w-8 h-8 rounded-full ${
+                    darkMode ? "bg-slate-900" : "bg-white"
+                  } border-2 ${
+                    darkMode ? "border-white" : "border-slate-900"
+                  } flex items-center justify-center animate-qrBlink overflow-hidden`}>
+                    <div 
+                      className={`w-3 h-3 rounded-full ${
+                        darkMode ? "bg-white" : "bg-slate-900"
+                      } transition-transform duration-100`}
+                      style={{
+                        transform: `translate(${Math.max(-1.5, Math.min(1.5, eyeMovement.x * 0.8))}px, ${Math.max(-1.5, Math.min(1.5, eyeMovement.y * 0.8))}px)`
+                      }}
+                    />
+                  </div>
+                </div>
+                
+                {/* Right Eye */}
+                <div className="absolute -right-2 -top-4">
+                  <div className={`w-8 h-8 rounded-full ${
+                    darkMode ? "bg-slate-900" : "bg-white"
+                  } border-2 ${
+                    darkMode ? "border-white" : "border-slate-900"
+                  } flex items-center justify-center animate-qrBlink overflow-hidden`}
+                  style={{ animationDelay: "0.1s" }}>
+                    <div 
+                      className={`w-3 h-3 rounded-full ${
+                        darkMode ? "bg-white" : "bg-slate-900"
+                      } transition-transform duration-100`}
+                      style={{
+                        transform: `translate(${Math.max(-1.5, Math.min(1.5, eyeMovement.x * 0.8))}px, ${Math.max(-1.5, Math.min(1.5, eyeMovement.y * 0.8))}px)`
+                      }}
+                    />
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+
+
           {/* MEDCHAIN Title */}
           <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-10">
             <h1
@@ -235,7 +344,6 @@ export default function LandingPage() {
           <div className="absolute w-[0.2vmin] h-[0.2vmin] bg-yellow-400 rounded-full animate-floatParticle4 opacity-60 z-20"></div>
         </div>
 
-        {/* Hero Content */}
         {/* Hero Content */}
         <div
           ref={heroRef}
@@ -753,6 +861,24 @@ export default function LandingPage() {
           50% { opacity: 0.5; transform: translateY(8px); }
           100% { opacity: 1; transform: translateY(0); }
         }
+
+        @keyframes qrFloat {
+          0% { transform: translateX(-50%) translateY(0px) rotate(0deg); }
+          25% { transform: translateX(-50%) translateY(-8px) rotate(1deg); }
+          50% { transform: translateX(-50%) translateY(0px) rotate(0deg); }
+          75% { transform: translateX(-50%) translateY(-8px) rotate(-1deg); }
+          100% { transform: translateX(-50%) translateY(0px) rotate(0deg); }
+        }
+
+        @keyframes qrBlink {
+          0%, 85%, 100% { transform: scaleY(1); }
+          87%, 93% { transform: scaleY(0.1); }
+        }
+
+        @keyframes qrSparkle {
+          0%, 100% { opacity: 0; transform: scale(0) rotate(0deg); }
+          50% { opacity: 1; transform: scale(1) rotate(180deg); }
+        }
         
         .animate-capsuleMove {
           animation: capsuleMove 4s ease-out infinite;
@@ -780,6 +906,18 @@ export default function LandingPage() {
         
         .animate-scrollIndicator {
           animation: scrollIndicator 2s ease-in-out infinite;
+        }
+
+        .animate-qrFloat {
+          animation: qrFloat 6s ease-in-out infinite;
+        }
+
+        .animate-qrBlink {
+          animation: qrBlink 4s ease-in-out infinite;
+        }
+
+        .animate-qrSparkle {
+          animation: qrSparkle 3s ease-in-out infinite;
         }
       `}</style>
     </div>
