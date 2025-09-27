@@ -1,92 +1,90 @@
 import LandingPage from "./LandingPage";
-
-
-import { Outlet, Link, NavLink } from 'react-router-dom';
+import { Outlet, Link, NavLink, useLocation } from 'react-router-dom';
 import { useRole } from './hooks/useRole';
-import WalletConnect from './components/WalletConnect.jsx'; // Your wallet connect/disconnect button
-import { Shield, User, Building } from 'lucide-react'; // Some icons for the user info
+import WalletConnect from './components/WalletConnect.jsx';
+import { Shield, User, Building } from 'lucide-react';
 import SubgraphStatus from './components/SubgraphStatus.jsx';
 import ErrorBoundary from './components/ErrorBoundary.jsx';
 
 export default function App() {
-  return <LandingPage />;
-  // const {
-  //   role,
-  //   isAdmin,
-  //   isManufacturer,
-  //   isConnected,
-  //   address,
-  //   manufacturer,
-  //   canRegisterBatch,
-  //   canRegisterAsManufacturer,
-  // } = useRole();
+  const location = useLocation();
+  const {
+    role,
+    isAdmin,
+    isManufacturer,
+    isConnected,
+    address,
+    manufacturer,
+    canRegisterBatch,
+    canRegisterAsManufacturer,
+  } = useRole();
 
-  // // This function adds styling to the currently active navigation link
-  // const navLinkClassName = ({ isActive }) =>
-  //   isActive
-  //     ? 'text-indigo-600 font-bold bg-indigo-50 px-3 py-1 rounded-md'
-  //     : 'text-gray-600 font-medium hover:text-indigo-600 hover:bg-gray-50 px-3 py-1 rounded-md transition-all whitespace-nowrap';
+  // If we're on the home page, show the landing page
+  if (location.pathname === '/') {
+    return <LandingPage />;
+  }
+
   // This function adds styling to the currently active navigation link
   const navLinkClassName = ({ isActive }) =>
     isActive
       ? 'text-white font-semibold bg-gradient-to-r from-indigo-500 to-purple-600 px-4 py-2 rounded-lg shadow-md transform scale-105 transition-all duration-200 whitespace-nowrap'
       : 'text-gray-700 font-medium hover:text-indigo-600 hover:bg-gradient-to-r hover:from-indigo-50 hover:to-purple-50 px-4 py-2 rounded-lg transition-all duration-200 whitespace-nowrap hover:shadow-sm hover:scale-105';
 
-  // const renderNavigation = () => {
-  //   // We use NavLink instead of Link to style the active page
-  //   if (isAdmin) {
-  //     return (
-  //       <>
-  //         <NavLink to="/" className={navLinkClassName}>Home</NavLink>
-  //         <NavLink to="/verify" className={navLinkClassName}>Verify</NavLink>
-  //         <NavLink to="/manufacturer/list" className={navLinkClassName}>Manufacturers</NavLink>
-  //         <NavLink to="/admin" className={navLinkClassName}>Admin Dashboard</NavLink>
-  //       </>
-  //     );
-  //   }
+  const renderNavigation = () => {
+    // We use NavLink instead of Link to style the active page
+    if (isAdmin) {
+      return (
+        <>
+          <NavLink to="/" className={navLinkClassName}>Home</NavLink>
+          <NavLink to="/verify" className={navLinkClassName}>Verify</NavLink>
+          <NavLink to="/manufacturer/list" className={navLinkClassName}>Manufacturers</NavLink>
+          <NavLink to="/admin" className={navLinkClassName}>Admin Dashboard</NavLink>
+        </>
+      );
+    }
 
-  //   if (isManufacturer) {
-  //     return (
-  //       <>
-  //         <NavLink to="/" className={navLinkClassName}>Home</NavLink>
-  //         <NavLink to="/verify" className={navLinkClassName}>Verify</NavLink>
-  //         <NavLink to="/manufacturer/me/batches" className={navLinkClassName}>My Batches</NavLink>
-  //         {canRegisterBatch && (
-  //           <NavLink to="/batch/register" className={navLinkClassName}>Register Batch</NavLink>
-  //         )}
-  //         <NavLink to="/manufacturer/me" className={navLinkClassName}>My Profile</NavLink>
-  //       </>
-  //     );
-  //   }
+    if (isManufacturer) {
+      return (
+        <>
+          <NavLink to="/" className={navLinkClassName}>Home</NavLink>
+          <NavLink to="/verify" className={navLinkClassName}>Verify</NavLink>
+          <NavLink to="/manufacturer/me/batches" className={navLinkClassName}>My Batches</NavLink>
+          {canRegisterBatch && (
+            <NavLink to="/batch/register" className={navLinkClassName}>Register Batch</NavLink>
+          )}
+          <NavLink to="/manufacturer/me" className={navLinkClassName}>My Profile</NavLink>
+        </>
+      );
+    }
 
-  //   // Default User navigation
-  //   return (
-  //     <>
-  //       <NavLink to="/" className={navLinkClassName}>Home</NavLink>
-  //       <NavLink to="/verify" className={navLinkClassName}>Verify</NavLink>
-  //       <NavLink to="/manufacturer/list" className={navLinkClassName}>Manufacturers</NavLink>
-  //       {canRegisterAsManufacturer && isConnected && (
-  //           <NavLink to="/manufacturer/register" className={navLinkClassName}>Register as Manufacturer</NavLink>
-  //       )}
-  //     </>
-  //   );
-  // };
+    // Default User navigation
+    return (
+      <>
+        <NavLink to="/" className={navLinkClassName}>Home</NavLink>
+        <NavLink to="/verify" className={navLinkClassName}>Verify</NavLink>
+        <NavLink to="/manufacturer/list" className={navLinkClassName}>Manufacturers</NavLink>
+        {canRegisterAsManufacturer && isConnected && (
+            <NavLink to="/manufacturer/register" className={navLinkClassName}>Register as Manufacturer</NavLink>
+        )}
+      </>
+    );
+  };
 
-  // const renderUserInfo = () => {
-  //   if (!isConnected) return null;
+  const renderUserInfo = () => {
+    if (!isConnected) return null;
 
-  //   let roleInfo = { text: 'User', icon: User, color: 'text-gray-500', bgColor: 'bg-gray-100' };
-  //   if (isAdmin) {
-  //     roleInfo = { text: 'Admin', icon: Shield, color: 'text-red-600', bgColor: 'bg-red-50' };
-  //   } else if (isManufacturer) {
-  //     roleInfo = { 
-  //       text: `Manufacturer ${manufacturer?.isVerified ? '' : '(Pending)'}`, 
-  //       icon: Building, 
-  //       color: manufacturer?.isVerified ? 'text-blue-600' : 'text-orange-600',
-  //       bgColor: manufacturer?.isVerified ? 'bg-blue-50' : 'bg-orange-50'
-  //     };
-  //   }
-  //   const RoleIcon = roleInfo.icon;
+    let roleInfo = { text: 'User', icon: User, color: 'text-gray-500', bgColor: 'bg-gray-100' };
+    if (isAdmin) {
+      roleInfo = { text: 'Admin', icon: Shield, color: 'text-red-600', bgColor: 'bg-red-50' };
+    } else if (isManufacturer) {
+      roleInfo = { 
+        text: `Manufacturer ${manufacturer?.isVerified ? '' : '(Pending)'}`, 
+        icon: Building, 
+        color: manufacturer?.isVerified ? 'text-blue-600' : 'text-orange-600',
+        bgColor: manufacturer?.isVerified ? 'bg-blue-50' : 'bg-orange-50'
+      };
+    }
+    const RoleIcon = roleInfo.icon;
 
     return (
       <div className={`flex items-center gap-2 text-xs md:text-sm font-medium text-gray-700 ${roleInfo.bgColor} px-2 py-1 rounded-md border`}>

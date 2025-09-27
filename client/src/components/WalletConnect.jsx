@@ -5,6 +5,7 @@ import { useAccount, useConnect, useDisconnect } from 'wagmi';
 const WalletSelectionModal = ({ isOpen, onClose, connectors, onSelectWallet, isPending }) => {
   const [isVisible, setIsVisible] = React.useState(false);
 
+  // Move useEffect outside of conditional logic - always call hooks
   React.useEffect(() => {
     if (isOpen) {
       setIsVisible(true);
@@ -15,6 +16,29 @@ const WalletSelectionModal = ({ isOpen, onClose, connectors, onSelectWallet, isP
     }
   }, [isOpen]);
 
+  // Always call useEffect hooks, but handle the logic inside
+  React.useEffect(() => {
+    const handleKeyDown = (e) => {
+      if (e.key === 'Escape') {
+        onClose();
+      }
+    };
+
+    if (isOpen) {
+      document.addEventListener('keydown', handleKeyDown);
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.removeEventListener('keydown', handleKeyDown);
+      document.body.style.overflow = 'unset';
+    }
+
+    return () => {
+      document.removeEventListener('keydown', handleKeyDown);
+      document.body.style.overflow = 'unset';
+    };
+  }, [isOpen, onClose]);
+
+  // Early return after all hooks are called
   if (!isVisible) return null;
 
   const getWalletIcon = (connectorName) => {
@@ -22,8 +46,8 @@ const WalletSelectionModal = ({ isOpen, onClose, connectors, onSelectWallet, isP
     if (name.includes('metamask')) return '🦊';
     if (name.includes('coinbase')) return '🔵';
     if (name.includes('walletconnect')) return '🔗';
-    if (name.includes('injected')) return '🔌';
-    return '💼';
+    if (name.includes('injected')) return '💎';
+    return '👛';
   };
 
   const getWalletDisplayName = (connectorName) => {
@@ -41,29 +65,8 @@ const WalletSelectionModal = ({ isOpen, onClose, connectors, onSelectWallet, isP
     }
   };
 
-  const handleKeyDown = (e) => {
-    if (e.key === 'Escape') {
-      onClose();
-    }
-  };
-
-  React.useEffect(() => {
-    if (isOpen) {
-      document.addEventListener('keydown', handleKeyDown);
-      document.body.style.overflow = 'hidden';
-    } else {
-      document.removeEventListener('keydown', handleKeyDown);
-      document.body.style.overflow = 'unset';
-    }
-
-    return () => {
-      document.removeEventListener('keydown', handleKeyDown);
-      document.body.style.overflow = 'unset';
-    };
-  }, [isOpen]);
-
   return (
-    <div 
+    <div
       style={{
         position: 'fixed',
         top: 0,
@@ -74,25 +77,26 @@ const WalletSelectionModal = ({ isOpen, onClose, connectors, onSelectWallet, isP
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
-        zIndex: 1000
+        zIndex: 1000,
       }}
       onClick={handleBackdropClick}
     >
-      <div style={{
-        backgroundColor: 'white',
-        borderRadius: '12px',
-        padding: '24px',
-        maxWidth: '400px',
-        width: '90%',
-        boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25)'
-      }}>
+      <div
+        style={{
+          backgroundColor: 'white',
+          borderRadius: '12px',
+          padding: '24px',
+          maxWidth: '400px',
+          width: '90%',
+          boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25)',
+        }}
+      >
         <h3 style={{ margin: '0 0 16px 0', fontSize: '18px', fontWeight: '600', color: '#1e293b' }}>
           Select Wallet
         </h3>
         <p style={{ margin: '0 0 20px 0', color: '#64748b', fontSize: '14px' }}>
           Choose your preferred wallet to connect to MedChain
         </p>
-        
         <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
           {connectors.map((connector) => (
             <button
@@ -109,7 +113,7 @@ const WalletSelectionModal = ({ isOpen, onClose, connectors, onSelectWallet, isP
                 backgroundColor: 'white',
                 cursor: isPending ? 'not-allowed' : 'pointer',
                 transition: 'all 0.2s',
-                opacity: isPending ? 0.6 : 1
+                opacity: isPending ? 0.6 : 1,
               }}
               onMouseOver={(e) => {
                 if (!isPending) {
@@ -129,14 +133,11 @@ const WalletSelectionModal = ({ isOpen, onClose, connectors, onSelectWallet, isP
                 <div style={{ fontWeight: '500', color: '#1e293b' }}>
                   {getWalletDisplayName(connector.name)}
                 </div>
-                <div style={{ fontSize: '12px', color: '#64748b' }}>
-                  {connector.name}
-                </div>
+                <div style={{ fontSize: '12px', color: '#64748b' }}>{connector.name}</div>
               </div>
             </button>
           ))}
         </div>
-        
         <button
           onClick={onClose}
           style={{
@@ -148,7 +149,7 @@ const WalletSelectionModal = ({ isOpen, onClose, connectors, onSelectWallet, isP
             backgroundColor: '#f8fafc',
             color: '#64748b',
             cursor: 'pointer',
-            fontSize: '14px'
+            fontSize: '14px',
           }}
         >
           Cancel
@@ -165,11 +166,10 @@ export default function WalletConnect() {
   const [showWalletModal, setShowWalletModal] = useState(false);
   const [availableConnectors, setAvailableConnectors] = useState([]);
 
-  // Detect available connectors
+  // Detect available connectors - always call this hook
   useEffect(() => {
     const detectAvailableConnectors = async () => {
       const available = [];
-      
       try {
         for (const connector of connectors) {
           try {
@@ -200,7 +200,6 @@ export default function WalletConnect() {
       } catch (error) {
         console.error('Error detecting connectors:', error);
       }
-      
       setAvailableConnectors(available);
     };
 
@@ -212,7 +211,7 @@ export default function WalletConnect() {
       alert('No wallet extensions found. Please install MetaMask or another compatible wallet.');
       return;
     }
-    
+
     if (availableConnectors.length === 1) {
       // If only one wallet is available, connect directly
       connect({ connector: availableConnectors[0] });
@@ -230,17 +229,19 @@ export default function WalletConnect() {
   if (isConnected) {
     return (
       <div style={{ marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: '8px' }}>
-        <span style={{ 
-          fontSize: '14px', 
-          color: '#4f46e5', 
-          fontWeight: '500',
-          backgroundColor: '#e0e7ff',
-          padding: '4px 8px',
-          borderRadius: '4px'
-        }}>
+        <span
+          style={{
+            fontSize: '14px',
+            color: '#4f46e5',
+            fontWeight: '500',
+            backgroundColor: '#e0e7ff',
+            padding: '4px 8px',
+            borderRadius: '4px',
+          }}
+        >
           {address?.slice(0, 6)}...{address?.slice(-4)}
         </span>
-        <button 
+        <button
           onClick={() => disconnect()}
           style={{
             padding: '6px 12px',
@@ -250,7 +251,7 @@ export default function WalletConnect() {
             border: 'none',
             borderRadius: '4px',
             cursor: 'pointer',
-            fontWeight: '500'
+            fontWeight: '500',
           }}
         >
           Disconnect
@@ -275,7 +276,7 @@ export default function WalletConnect() {
           fontSize: '14px',
           fontWeight: '500',
           opacity: isPending ? 0.6 : 1,
-          transition: 'all 0.2s'
+          transition: 'all 0.2s',
         }}
         onMouseOver={(e) => {
           if (!isPending) {
@@ -290,7 +291,6 @@ export default function WalletConnect() {
       >
         {isPending ? 'Connecting...' : 'Connect Wallet'}
       </button>
-      
       <WalletSelectionModal
         isOpen={showWalletModal}
         onClose={() => setShowWalletModal(false)}
