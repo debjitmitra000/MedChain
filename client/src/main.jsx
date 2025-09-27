@@ -23,7 +23,6 @@ import BatchDetail from './pages/BatchDetail.jsx';
 import RecallBatch from './pages/RecallBatch.jsx';
 import ExpiredReports from './pages/ExpiredReports.jsx';
 import AdminDashboard from './pages/AdminDashboard.jsx';
-import './index.css';
 
 // Wagmi and QueryClient setup
 const chainId = Number(import.meta.env.VITE_CHAIN_ID || 11155111);
@@ -43,13 +42,14 @@ const wagmiConfig = createConfig({
 });
 const queryClient = new QueryClient();
 
-// Single unified router
+// Updated router with dashboard route
 const router = createBrowserRouter([
   {
     path: '/',
     element: <App />,
     children: [
-      { index: true, element: <Home /> }, // This will be handled by App.jsx to show LandingPage
+      { index: true, element: <Home /> }, // Landing page
+      { path: 'dashboard', element: <Verify /> }, // Main dashboard - defaults to verify page
       { path: 'verify/:batchId?', element: <Verify /> },
       { path: 'manufacturer/register', element: <ManufacturerRegister /> },
       { path: 'manufacturer/list', element: <ManufacturerList /> },
