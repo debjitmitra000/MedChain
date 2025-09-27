@@ -11,6 +11,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 // Import your custom hook and all pages
 import { useRole } from './hooks/useRole';
 import App from './App.jsx';
+import ErrorBoundary from './components/ErrorBoundary.jsx';
 import Home from './pages/Home.jsx';
 import LandingPage from './pages/LandingPage.jsx'; // Import the new landing page
 import Verify from './pages/Verify.jsx';
@@ -91,10 +92,12 @@ const AppRouter = () => {
 // Render the main AppRouter component
 createRoot(document.getElementById('root')).render(
   <StrictMode>
-    <WagmiProvider config={wagmiConfig}>
-      <QueryClientProvider client={queryClient}>
-        <AppRouter />
-      </QueryClientProvider>
-    </WagmiProvider>
+    <ErrorBoundary>
+      <WagmiProvider config={wagmiConfig}>
+        <QueryClientProvider client={queryClient}>
+          <AppRouter />
+        </QueryClientProvider>
+      </WagmiProvider>
+    </ErrorBoundary>
   </StrictMode>
 );
