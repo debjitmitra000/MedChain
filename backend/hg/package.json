@@ -9,7 +9,7 @@
     "dev": "vite --force",
     "preview": "vite preview",
     "typecheck": "tsc --noEmit",
-    "typesync": "hg typesync --open"
+    "typesync": "npx hg typesync"
   },
   "dependencies": {
     "@graphprotocol/hypergraph": "0.7.3",
