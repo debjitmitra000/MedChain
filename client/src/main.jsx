@@ -1,3 +1,14 @@
+// Import React and necessary libraries
+import { StrictMode } from 'react';
+import { createRoot } from 'react-dom/client';
+import { createBrowserRouter, RouterProvider } from 'react-router-dom';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { WagmiProvider, createConfig, http } from 'wagmi';
+import { mainnet, sepolia } from 'viem/chains'; // Import chains from viem/chains
+import { injected, metaMask, walletConnect, coinbaseWallet } from 'wagmi/connectors';
+import './style.css';
+
+
 // Import your pages
 import App from './App.jsx';
 import ErrorBoundary from './components/ErrorBoundary.jsx';
@@ -53,8 +64,8 @@ const router = createBrowserRouter([
       { path: 'batch/:batchId', element: <BatchDetail /> },
       { path: 'batch/:batchId/recall', element: <RecallBatch /> },
       { path: 'reports/expired', element: <ExpiredReports /> },
-  { path: 'admin', element: <AdminDashboard /> },
-  { path: 'profile/edit', element: <ProfileEdit /> },
+      { path: 'admin', element: <AdminDashboard /> },
+      { path: 'profile/edit', element: <ProfileEdit /> },
     ],
   },
 ]);
