@@ -37,43 +37,48 @@ import {
 
 export default function AdminDashboard() {
   const { address } = useAccount();
-<<<<<<< HEAD
-  const [darkMode, setDarkMode] = useState(true);
-=======
+  
   const { darkMode } = useTheme();
   const [expandedCard, setExpandedCard] = useState(null);
   
-  const { data: statsData, isLoading: statsLoading, error: statsError } = useQuery({
+  // API-based data fetching (renamed to avoid conflicts)
+  const { data: apiStatsData, isLoading: apiStatsLoading, error: apiStatsError } = useQuery({
     queryKey: ['stats'],
     queryFn: getGlobalStats,
     retry: false,
     staleTime: 30000,
   });
   
-  const { data: reportsData, isLoading: reportsLoading, error: reportsError } = useQuery({
+  const { data: apiReportsData, isLoading: apiReportsLoading, error: apiReportsError } = useQuery({
     queryKey: ['expired-reports'],
     queryFn: getExpiredReports,
     retry: false,
     staleTime: 30000,
   });
->>>>>>> origin/main
 
-  // Subgraph hooks
+  const { data: unverifiedData, isLoading: unverifiedLoading, error: unverifiedError } = useQuery({
+    queryKey: ['unverified-manufacturers'],
+    queryFn: getUnverifiedManufacturers,
+    retry: false,
+    staleTime: 30000,
+  });
+
+  // Subgraph hooks (keeping original names)
   const { data: statsData, loading: statsLoading, error: statsError } = useDashboardStats();
   const { data: reportsData, loading: reportsLoading, error: reportsError } = useExpiredBatches();
   const { data: verifiedData, loading: verifiedLoading, error: verifiedError } = useVerifiedManufacturers();
 
-  // Use real data from subgraph
-  const stats = statsData || {};
-  const reports = reportsData?.medicineBatches || [];
-  const unverifiedManufacturers = verifiedData?.manufacturers || [];
+  // Use subgraph data as primary source, fallback to API data
+  const stats = statsData || apiStatsData?.stats || {};
+  const reports = reportsData?.medicineBatches || apiReportsData?.data?.reports || [];
+  const unverifiedManufacturers = unverifiedData?.data?.manufacturers || [];
   
   // Check if user is admin
   const isAdmin = address && stats?.adminAddress && 
     address.toLowerCase() === stats.adminAddress.toLowerCase();
 
   // Show loading state
-  if (statsLoading || reportsLoading || verifiedLoading) {
+  if (statsLoading || reportsLoading || verifiedLoading || apiStatsLoading || apiReportsLoading || unverifiedLoading) {
     return (
       <div className={`min-h-screen font-sans transition-colors duration-500 ${
         darkMode ? 'bg-slate-950 text-white' : 'bg-white text-slate-900'
@@ -95,11 +100,11 @@ export default function AdminDashboard() {
   }
 
   // Show API error if backend is not available
-  const hasApiError = statsError || reportsError || verifiedError;
+  const hasApiError = apiStatsError || apiReportsError || unverifiedError;
   const isBackendUnavailable = hasApiError && (
-    statsError?.message?.includes('ECONNREFUSED') ||
-    reportsError?.message?.includes('ECONNREFUSED') ||
-    verifiedError?.message?.includes('ECONNREFUSED')
+    apiStatsError?.message?.includes('ECONNREFUSED') ||
+    apiReportsError?.message?.includes('ECONNREFUSED') ||
+    unverifiedError?.message?.includes('ECONNREFUSED')
   );
 
   if (!isAdmin) {

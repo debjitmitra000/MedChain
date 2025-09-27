@@ -7,10 +7,9 @@ import { WagmiProvider, createConfig, http } from 'wagmi';
 import { mainnet, sepolia } from 'viem/chains'; // Import chains from viem/chains
 import { injected, metaMask, walletConnect, coinbaseWallet } from 'wagmi/connectors';
 import './style.css';
-
-
-// Import your pages
+import { ThemeProvider } from './contexts/ThemeContext'
 import App from './App.jsx';
+import LandingPage from './LandingPage.jsx'; // Add this import
 import ErrorBoundary from './components/ErrorBoundary.jsx';
 import Home from './pages/Home.jsx';
 import Verify from './pages/Verify.jsx';
@@ -45,13 +44,17 @@ const wagmiConfig = createConfig({
 });
 const queryClient = new QueryClient();
 
-// Updated router with dashboard route
+// Updated router - separate landing page from app routes
 const router = createBrowserRouter([
+  {
+    path: '/',
+    element: <LandingPage />, // Landing page as separate route
+  },
   {
     path: '/',
     element: <App />,
     children: [
-      { index: true, element: <Home /> }, // Landing page
+      { path: 'home', element: <Home /> }, // Dashboard home
       { path: 'dashboard', element: <Verify /> }, // Main dashboard - defaults to verify page
       { path: 'verify/:batchId?', element: <Verify /> },
       { path: 'manufacturer/register', element: <ManufacturerRegister /> },
@@ -76,7 +79,9 @@ createRoot(document.getElementById('root')).render(
     <ErrorBoundary>
       <WagmiProvider config={wagmiConfig}>
         <QueryClientProvider client={queryClient}>
-          <RouterProvider router={router} />
+          <ThemeProvider>
+            <RouterProvider router={router} />
+          </ThemeProvider>
         </QueryClientProvider>
       </WagmiProvider>
     </ErrorBoundary>
