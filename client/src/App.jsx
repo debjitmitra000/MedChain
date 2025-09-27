@@ -4,6 +4,7 @@ import { useRole } from './hooks/useRole';
 import WalletConnect from './components/WalletConnect.jsx';
 import { Shield, User, Building } from 'lucide-react';
 import ErrorBoundary from './components/ErrorBoundary.jsx';
+import { ToastProvider } from './components/Toast.jsx';
 
 export default function App() {
   const location = useLocation();
@@ -96,50 +97,52 @@ export default function App() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      {/* HEADER / NAVIGATION BAR */}
-      <header className="bg-white shadow-md sticky top-0 z-10">
-        <nav className="container mx-auto px-4 py-3 flex justify-between items-center">
-          {/* Left Side: Logo and Navigation Links */}
-          <div className="flex items-center gap-4 md:gap-8">
-            <Link to="/" className="text-xl md:text-2xl font-bold text-indigo-600 flex items-center gap-2">
-              <Shield className="h-6 w-6 md:h-8 md:w-8" />
-              <span className="hidden sm:inline">MedChain</span>
-              <span className="sm:hidden">MC</span>
-            </Link>
-            <div className="hidden lg:flex items-center gap-6">
-              {renderNavigation()}
-            </div>
-          </div>
-
-          {/* Right Side: User Info and Wallet Button */}
-          <div className="flex items-center gap-2 md:gap-4">
-            <div className="hidden md:block">
-              {renderUserInfo()}
-            </div>
-            <WalletConnect />
-          </div>
-        </nav>
-        
-        {/* Mobile Navigation */}
-        <div className="lg:hidden border-t border-gray-200 bg-white">
-          <div className="container mx-auto px-4 py-2">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-4 overflow-x-auto">
+    <ToastProvider>
+      <div className="min-h-screen bg-gray-50">
+        {/* HEADER / NAVIGATION BAR */}
+        <header className="bg-white shadow-md sticky top-0 z-10">
+          <nav className="container mx-auto px-4 py-3 flex justify-between items-center">
+            {/* Left Side: Logo and Navigation Links */}
+            <div className="flex items-center gap-4 md:gap-8">
+              <Link to="/" className="text-xl md:text-2xl font-bold text-indigo-600 flex items-center gap-2">
+                <Shield className="h-6 w-6 md:h-8 md:w-8" />
+                <span className="hidden sm:inline">MedChain</span>
+                <span className="sm:hidden">MC</span>
+              </Link>
+              <div className="hidden lg:flex items-center gap-6">
                 {renderNavigation()}
               </div>
-              <div className="md:hidden">
+            </div>
+
+            {/* Right Side: User Info and Wallet Button */}
+            <div className="flex items-center gap-2 md:gap-4">
+              <div className="hidden md:block">
                 {renderUserInfo()}
+              </div>
+              <WalletConnect />
+            </div>
+          </nav>
+          
+          {/* Mobile Navigation */}
+          <div className="lg:hidden border-t border-gray-200 bg-white">
+            <div className="container mx-auto px-4 py-2">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-4 overflow-x-auto">
+                  {renderNavigation()}
+                </div>
+                <div className="md:hidden">
+                  {renderUserInfo()}
+                </div>
               </div>
             </div>
           </div>
-        </div>
-      </header>
+        </header>
 
-      {/* MAIN CONTENT AREA */}
-      <main className="container mx-auto p-4 md:p-6">
-        <Outlet />
-      </main>
-    </div>
+        {/* MAIN CONTENT AREA */}
+        <main className="container mx-auto p-4 md:p-6">
+          <Outlet />
+        </main>
+      </div>
+    </ToastProvider>
   );
 }

@@ -1,23 +1,59 @@
 import { Link, useNavigate } from 'react-router-dom';
-import { useQuery } from '@tanstack/react-query';
-import { useState } from 'react';
-import { getManufacturerList } from '../api/manufacturer';
+import { useState, useMemo } from 'react';
+import { useManufacturers, useVerifiedManufacturers, usePagination, useRealTimeUpdates } from '../hooks/useSubgraph';
 import ManufacturerCard from '../components/ManufacturerCard';
+import { useToast } from '../components/Toast';
 
 export default function ManufacturerList() {
   const navigate = useNavigate();
-  const [filters, setFilters] = useState({ status: 'all', limit: 20, offset: 0 });
-  
-  const { data, isLoading, error } = useQuery({
-    queryKey: ['manufacturer-list', filters],
-    queryFn: () => getManufacturerList(filters),
+  const { addToast } = useToast();
+  const [filters, setFilters] = useState({ 
+    status: 'all', 
+    orderBy: 'registeredAt', 
+    orderDirection: 'desc',
+    realTimeEnabled: false
   });
-
+  
+  // Pagination hook
+  const pagination = usePagination(0, 20);
+  
+  // Choose appropriate query based on filter
+  const queryOptions = useMemo(() => ({
+    limit: pagination.pageSize,
+    skip: pagination.currentPage * pagination.pageSize,
+    orderBy: filters.orderBy,
+    orderDirection: filters.orderDirection,
+    pollInterval: filters.realTimeEnabled ? 30000 : 0,
+    onError: (error) => {
+      addToast(`Failed to load manufacturers: ${error.userMessage || error.message}`, 'error');
+    },
+    onCompleted: (data) => {
+      if (filters.realTimeEnabled && pagination.currentPage === 0) {
+        addToast('Manufacturer list updated', 'info');
+      }
+    }
+  }), [pagination, filters, addToast]);
+  
+  // Get data based on filter status
+  const { data, loading, error, refetch, networkStatus } = filters.status === 'verified' 
+    ? useVerifiedManufacturers(queryOptions)
+    : useManufacturers(queryOptions);
+    
   const handleManufacturerClick = (manufacturer) => {
-    navigate(`/manufacturer/${manufacturer.wallet || manufacturer.address}`);
+    const id = manufacturer.address || manufacturer.wallet || manufacturer.id;
+    if (id) {
+      navigate(`/manufacturer/${id}`);
+    } else {
+      // Optionally show a toast or do nothing
+      addToast('Manufacturer does not have a valid address or ID.', 'error');
+    }
+  } 
+
+  const toggleRealTime = () => {
+    setFilters(f => ({ ...f, realTimeEnabled: !f.realTimeEnabled }));
   };
 
-  if (isLoading) {
+  if (loading) {
     return (
       <div className="max-w-6xl mx-auto">
         <div className="mb-8">
@@ -60,8 +96,8 @@ export default function ManufacturerList() {
     );
   }
 
-  const manufacturers = data?.data?.manufacturers || [];
-  const pagination = data?.data?.pagination || {};
+  // Extract manufacturers from the subgraph response
+  const manufacturerList = data?.manufacturers || [];
 
   return (
     <div className="max-w-6xl mx-auto">
@@ -82,29 +118,35 @@ export default function ManufacturerList() {
             </label>
             <select 
               value={filters.status} 
-              onChange={(e) => setFilters(f => ({ ...f, status: e.target.value, offset: 0 }))}
+              onChange={(e) => {
+                setFilters(f => ({ ...f, status: e.target.value }));
+                pagination.goToPage(0);
+              }}
               className="px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
             >
               <option value="all">All Manufacturers</option>
               <option value="verified">Verified Only</option>
-              <option value="unverified">Unverified Only</option>
-              <option value="active">Active Only</option>
-              <option value="inactive">Inactive Only</option>
             </select>
           </div>
           
           <div>
             <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-              Per Page
+              Sort By
             </label>
             <select 
-              value={filters.limit} 
-              onChange={(e) => setFilters(f => ({ ...f, limit: Number(e.target.value), offset: 0 }))}
+              value={`${filters.orderBy}-${filters.orderDirection}`}
+              onChange={(e) => {
+                const [orderBy, orderDirection] = e.target.value.split('-');
+                setFilters(f => ({ ...f, orderBy, orderDirection }));
+              }}
               className="px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
             >
-              <option value={10}>10 per page</option>
-              <option value={20}>20 per page</option>
-              <option value={50}>50 per page</option>
+              <option value="registeredAt-desc">Newest First</option>
+              <option value="registeredAt-asc">Oldest First</option>
+              <option value="name-asc">Name (A-Z)</option>
+              <option value="name-desc">Name (Z-A)</option>
+              <option value="totalBatches-desc">Most Batches</option>
+              <option value="totalBatches-asc">Least Batches</option>
             </select>
           </div>
         </div>
@@ -113,11 +155,11 @@ export default function ManufacturerList() {
       {/* Results */}
       <div className="mb-6">
         <p className="text-gray-600 dark:text-gray-400">
-          Showing {manufacturers.length} of {pagination.total} manufacturers
+          Showing {manufacturerList.length} of {pagination.total} manufacturers
         </p>
       </div>
       
-      {manufacturers.length === 0 ? (
+      {manufacturerList.length === 0 ? (
         <div className="text-center py-12">
           <div className="w-24 h-24 mx-auto mb-4 text-gray-400 dark:text-gray-600">
             <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" className="w-full h-full">
@@ -129,12 +171,12 @@ export default function ManufacturerList() {
         </div>
       ) : (
         <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-1">
-          {manufacturers.map((mfr, i) => (
+          {manufacturerList.map((mfr, i) => (
             <ManufacturerCard
               key={i}
               manufacturer={{
                 ...mfr,
-                address: mfr.wallet || mfr.address,
+                address: mfr.address || mfr.wallet || mfr.id,
               }}
               onClick={handleManufacturerClick}
               showProfilePicture={true}
