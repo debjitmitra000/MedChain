@@ -26,9 +26,9 @@ function Index() {
       <div className="text-center mb-12">
         <img src="/hypergraph.svg" alt="Hypergraph Logo" className="w-24 h-24 mx-auto mb-4" />
         <h1 className="text-4xl font-bold mb-4 bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
-          Welcome to Hypergraph
+          MedChain Hypergraph
         </h1>
-        <p className="text-lg text-muted-foreground">Your web3 app template powered by Hypergraph</p>
+        <p className="text-lg text-muted-foreground">Pharmaceutical Supply Chain Transparency via Hypergraph</p>
       </div>
 
       <div className="grid md:grid-cols-3 gap-8 max-w-6xl mx-auto">
@@ -55,7 +55,7 @@ function Index() {
             <p className="text-gray-600 dark:text-gray-300 mb-4">
               Discover and explore the vast network of knowledge already available in the public Knowledge Graph.
             </p>
-            <Link to="/explore-public-knowledge/projects">
+            <Link to="/explore-public-knowledge">
               <Button variant="outline" className="w-full">
                 Start Exploring
               </Button>
@@ -106,12 +106,12 @@ function Index() {
           </div>
         </div>
 
-        {/* Section 3: Explore the docs */}
+        {/* Section 3: MedChain Data */}
         <div className="bg-white dark:bg-gray-800 rounded-lg p-6 shadow-lg border border-gray-200 dark:border-gray-700">
           <div className="text-center">
-            <div className="w-12 h-12 bg-gray-100 dark:bg-gray-800 rounded-lg flex items-center justify-center mx-auto mb-4">
+            <div className="w-12 h-12 bg-green-100 dark:bg-green-800 rounded-lg flex items-center justify-center mx-auto mb-4">
               <svg
-                className="w-6 h-6 text-gray-400 dark:text-gray-300"
+                className="w-6 h-6 text-green-600 dark:text-green-300"
                 fill="none"
                 stroke="currentColor"
                 viewBox="0 0 24 24"
@@ -121,25 +121,17 @@ function Index() {
                   strokeLinecap="round"
                   strokeLinejoin="round"
                   strokeWidth={2}
-                  d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.746 0 3.332.477 4.5 1.253v13C19.832 18.477 18.246 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"
+                  d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z"
                 />
               </svg>
             </div>
-            <h3 className="text-xl font-semibold mb-3">Explore the Docs</h3>
+            <h3 className="text-xl font-semibold mb-3">MedChain Dashboard</h3>
             <p className="text-gray-600 dark:text-gray-300 mb-4">
-              Learn how to build with Hypergraph and discover all the features available in our comprehensive
-              documentation.
+              View pharmaceutical manufacturers, medicine batches, and supply chain data indexed via Hypergraph.
             </p>
-            <a
-              href="https://docs.hypergraph.thegraph.com/docs/quickstart"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-block w-full"
-            >
-              <Button variant="outline" className="w-full">
-                Read Documentation
-              </Button>
-            </a>
+            <Button variant="outline" className="w-full" disabled>
+              View Dashboard (Coming Soon)
+            </Button>
           </div>
         </div>
       </div>

@@ -90,3 +90,4 @@ npm start
 3. Register test manufacturers and batches
 4. Test API endpoints
 5. Connect frontend to real data
+
