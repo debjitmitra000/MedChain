@@ -42,13 +42,14 @@ const wagmiConfig = createConfig({
 });
 const queryClient = new QueryClient();
 
-// Single unified router
+// Updated router with dashboard route
 const router = createBrowserRouter([
   {
     path: '/',
     element: <App />,
     children: [
-      { index: true, element: <Home /> }, // This will be handled by App.jsx to show LandingPage
+      { index: true, element: <Home /> }, // Landing page
+      { path: 'dashboard', element: <Verify /> }, // Main dashboard - defaults to verify page
       { path: 'verify/:batchId?', element: <Verify /> },
       { path: 'manufacturer/register', element: <ManufacturerRegister /> },
       { path: 'manufacturer/list', element: <ManufacturerList /> },
