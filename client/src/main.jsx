@@ -23,7 +23,6 @@ import BatchDetail from './pages/BatchDetail.jsx';
 import RecallBatch from './pages/RecallBatch.jsx';
 import ExpiredReports from './pages/ExpiredReports.jsx';
 import AdminDashboard from './pages/AdminDashboard.jsx';
-import './index.css';
 
 // Wagmi and QueryClient setup
 const chainId = Number(import.meta.env.VITE_CHAIN_ID || 11155111);

@@ -2,10 +2,9 @@ import React, { useState, useEffect } from 'react';
 import { useAccount, useConnect, useDisconnect } from 'wagmi';
 
 // Wallet selection modal component
-const WalletSelectionModal = ({ isOpen, onClose, connectors, onSelectWallet, isPending }) => {
+const WalletSelectionModal = ({ isOpen, onClose, connectors, onSelectWallet, isPending, darkMode = true }) => {
   const [isVisible, setIsVisible] = React.useState(false);
 
-  // Move useEffect outside of conditional logic - always call hooks
   React.useEffect(() => {
     if (isOpen) {
       setIsVisible(true);
@@ -16,7 +15,6 @@ const WalletSelectionModal = ({ isOpen, onClose, connectors, onSelectWallet, isP
     }
   }, [isOpen]);
 
-  // Always call useEffect hooks, but handle the logic inside
   React.useEffect(() => {
     const handleKeyDown = (e) => {
       if (e.key === 'Escape') {
@@ -38,7 +36,6 @@ const WalletSelectionModal = ({ isOpen, onClose, connectors, onSelectWallet, isP
     };
   }, [isOpen, onClose]);
 
-  // Early return after all hooks are called
   if (!isVisible) return null;
 
   const getWalletIcon = (connectorName) => {
@@ -67,90 +64,66 @@ const WalletSelectionModal = ({ isOpen, onClose, connectors, onSelectWallet, isP
 
   return (
     <div
-      style={{
-        position: 'fixed',
-        top: 0,
-        left: 0,
-        right: 0,
-        bottom: 0,
-        backgroundColor: 'rgba(0, 0, 0, 0.5)',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        zIndex: 1000,
-      }}
+      className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 backdrop-blur-sm"
       onClick={handleBackdropClick}
     >
       <div
+        className={`rounded-2xl p-6 max-w-md w-11/12 shadow-2xl transform transition-all duration-300 ${
+          darkMode
+            ? 'bg-slate-800 border border-slate-700'
+            : 'bg-white border border-slate-200'
+        }`}
         style={{
-          backgroundColor: 'white',
-          borderRadius: '12px',
-          padding: '24px',
-          maxWidth: '400px',
-          width: '90%',
-          boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25)',
+          transform: isOpen ? 'scale(1) translateY(0)' : 'scale(0.95) translateY(10px)',
         }}
       >
-        <h3 style={{ margin: '0 0 16px 0', fontSize: '18px', fontWeight: '600', color: '#1e293b' }}>
-          Select Wallet
+        <h3 className={`text-xl font-bold mb-2 ${
+          darkMode ? 'text-white' : 'text-slate-900'
+        }`}>
+          Connect Wallet
         </h3>
-        <p style={{ margin: '0 0 20px 0', color: '#64748b', fontSize: '14px' }}>
+        <p className={`text-sm mb-6 ${
+          darkMode ? 'text-slate-400' : 'text-slate-600'
+        }`}>
           Choose your preferred wallet to connect to MedChain
         </p>
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+        
+        <div className="space-y-3">
           {connectors.map((connector) => (
             <button
               key={connector.uid}
               onClick={() => onSelectWallet(connector)}
               disabled={isPending}
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: '12px',
-                padding: '12px 16px',
-                border: '1px solid #e2e8f0',
-                borderRadius: '8px',
-                backgroundColor: 'white',
-                cursor: isPending ? 'not-allowed' : 'pointer',
-                transition: 'all 0.2s',
-                opacity: isPending ? 0.6 : 1,
-              }}
-              onMouseOver={(e) => {
-                if (!isPending) {
-                  e.target.style.backgroundColor = '#f8fafc';
-                  e.target.style.borderColor = '#4f46e5';
-                }
-              }}
-              onMouseOut={(e) => {
-                if (!isPending) {
-                  e.target.style.backgroundColor = 'white';
-                  e.target.style.borderColor = '#e2e8f0';
-                }
-              }}
+              className={`w-full flex items-center gap-4 p-4 rounded-xl border transition-all duration-300 hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed ${
+                darkMode
+                  ? 'border-slate-600 bg-slate-700 hover:border-emerald-500 hover:bg-slate-600'
+                  : 'border-slate-200 bg-white hover:border-emerald-500 hover:bg-emerald-50'
+              }`}
             >
-              <span style={{ fontSize: '20px' }}>{getWalletIcon(connector.name)}</span>
-              <div style={{ flex: 1, textAlign: 'left' }}>
-                <div style={{ fontWeight: '500', color: '#1e293b' }}>
+              <span className="text-2xl">{getWalletIcon(connector.name)}</span>
+              <div className="flex-1 text-left">
+                <div className={`font-semibold ${
+                  darkMode ? 'text-white' : 'text-slate-900'
+                }`}>
                   {getWalletDisplayName(connector.name)}
                 </div>
-                <div style={{ fontSize: '12px', color: '#64748b' }}>{connector.name}</div>
+                <div className={`text-xs ${
+                  darkMode ? 'text-slate-400' : 'text-slate-500'
+                }`}>
+                  {connector.name}
+                </div>
               </div>
             </button>
           ))}
         </div>
+        
         <button
           onClick={onClose}
-          style={{
-            marginTop: '16px',
-            width: '100%',
-            padding: '8px 16px',
-            border: '1px solid #e2e8f0',
-            borderRadius: '6px',
-            backgroundColor: '#f8fafc',
-            color: '#64748b',
-            cursor: 'pointer',
-            fontSize: '14px',
-          }}
+          className={`mt-6 w-full py-3 px-4 rounded-xl text-sm font-medium transition-all duration-300 ${
+            darkMode
+              ? 'bg-slate-700 text-slate-300 hover:bg-slate-600 border border-slate-600'
+              : 'bg-slate-100 text-slate-600 hover:bg-slate-200 border border-slate-300'
+          }`}
         >
           Cancel
         </button>
@@ -159,7 +132,7 @@ const WalletSelectionModal = ({ isOpen, onClose, connectors, onSelectWallet, isP
   );
 };
 
-export default function WalletConnect() {
+export default function WalletConnect({ darkMode = true }) {
   const { address, isConnected } = useAccount();
   const { connect, connectors, isPending } = useConnect();
   const { disconnect } = useDisconnect();
@@ -228,31 +201,21 @@ export default function WalletConnect() {
 
   if (isConnected) {
     return (
-      <div style={{ marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: '8px' }}>
-        <span
-          style={{
-            fontSize: '14px',
-            color: '#4f46e5',
-            fontWeight: '500',
-            backgroundColor: '#e0e7ff',
-            padding: '4px 8px',
-            borderRadius: '4px',
-          }}
-        >
+      <div className="flex items-center gap-3">
+        <div className={`px-3 py-2 rounded-lg text-sm font-medium ${
+          darkMode
+            ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30'
+            : 'bg-emerald-50 text-emerald-600 border border-emerald-200'
+        }`}>
           {address?.slice(0, 6)}...{address?.slice(-4)}
-        </span>
+        </div>
         <button
           onClick={() => disconnect()}
-          style={{
-            padding: '6px 12px',
-            fontSize: '12px',
-            backgroundColor: '#ef4444',
-            color: 'white',
-            border: 'none',
-            borderRadius: '4px',
-            cursor: 'pointer',
-            fontWeight: '500',
-          }}
+          className={`px-4 py-2 rounded-lg text-sm font-medium transition-all duration-300 hover:scale-105 ${
+            darkMode
+              ? 'bg-red-500/20 text-red-400 border border-red-500/30 hover:bg-red-500/30'
+              : 'bg-red-50 text-red-600 border border-red-200 hover:bg-red-100'
+          }`}
         >
           Disconnect
         </button>
@@ -265,38 +228,22 @@ export default function WalletConnect() {
       <button
         onClick={handleConnectClick}
         disabled={isPending}
-        style={{
-          marginLeft: 'auto',
-          padding: '8px 16px',
-          backgroundColor: '#4f46e5',
-          color: 'white',
-          border: 'none',
-          borderRadius: '6px',
-          cursor: isPending ? 'not-allowed' : 'pointer',
-          fontSize: '14px',
-          fontWeight: '500',
-          opacity: isPending ? 0.6 : 1,
-          transition: 'all 0.2s',
-        }}
-        onMouseOver={(e) => {
-          if (!isPending) {
-            e.target.style.backgroundColor = '#4338ca';
-          }
-        }}
-        onMouseOut={(e) => {
-          if (!isPending) {
-            e.target.style.backgroundColor = '#4f46e5';
-          }
-        }}
+        className={`px-8 py-4 rounded-full text-lg font-semibold transition-all duration-300 hover:scale-105 shadow-lg disabled:opacity-50 disabled:cursor-not-allowed ${
+          darkMode
+            ? 'bg-gradient-to-r from-emerald-500 to-emerald-600 text-white hover:from-emerald-600 hover:to-emerald-700 shadow-emerald-500/20'
+            : 'bg-gradient-to-r from-emerald-500 to-emerald-600 text-white hover:from-emerald-600 hover:to-emerald-700 shadow-emerald-500/20'
+        }`}
       >
         {isPending ? 'Connecting...' : 'Connect Wallet'}
       </button>
+      
       <WalletSelectionModal
         isOpen={showWalletModal}
         onClose={() => setShowWalletModal(false)}
         connectors={availableConnectors}
         onSelectWallet={handleWalletSelect}
         isPending={isPending}
+        darkMode={darkMode}
       />
     </>
   );

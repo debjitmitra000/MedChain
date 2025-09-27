@@ -3,7 +3,6 @@ import { Outlet, Link, NavLink, useLocation } from 'react-router-dom';
 import { useRole } from './hooks/useRole';
 import WalletConnect from './components/WalletConnect.jsx';
 import { Shield, User, Building } from 'lucide-react';
-import SubgraphStatus from './components/SubgraphStatus.jsx';
 import ErrorBoundary from './components/ErrorBoundary.jsx';
 
 export default function App() {
@@ -117,9 +116,6 @@ export default function App() {
           <div className="flex items-center gap-2 md:gap-4">
             <div className="hidden md:block">
               {renderUserInfo()}
-            </div>
-            <div className="hidden sm:block">
-              <SubgraphStatus />
             </div>
             <WalletConnect />
           </div>
