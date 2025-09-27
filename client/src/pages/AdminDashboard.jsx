@@ -2,8 +2,12 @@ import React, { useState, useEffect } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { useAccount } from 'wagmi';
 import { Link } from 'react-router-dom';
-import { getGlobalStats, getExpiredReports } from '../api/verify';
-import { getUnverifiedManufacturers } from '../api/manufacturer';
+import {
+  useDashboardStats,
+  useExpiredBatches,
+  useManufacturer,
+  useVerifiedManufacturers,
+} from '../hooks/useSubgraph';
 import {
   Sun,
   Moon,
@@ -28,32 +32,16 @@ import {
 export default function AdminDashboard() {
   const { address } = useAccount();
   const [darkMode, setDarkMode] = useState(true);
-  
-  const { data: statsData, isLoading: statsLoading, error: statsError } = useQuery({
-    queryKey: ['stats'],
-    queryFn: getGlobalStats,
-    retry: false,
-    staleTime: 30000,
-  });
-  
-  const { data: reportsData, isLoading: reportsLoading, error: reportsError } = useQuery({
-    queryKey: ['expired-reports'],
-    queryFn: getExpiredReports,
-    retry: false,
-    staleTime: 30000,
-  });
 
-  const { data: unverifiedData, isLoading: unverifiedLoading, error: unverifiedError } = useQuery({
-    queryKey: ['unverified-manufacturers'],
-    queryFn: getUnverifiedManufacturers,
-    retry: false,
-    staleTime: 30000,
-  });
+  // Subgraph hooks
+  const { data: statsData, loading: statsLoading, error: statsError } = useDashboardStats();
+  const { data: reportsData, loading: reportsLoading, error: reportsError } = useExpiredBatches();
+  const { data: verifiedData, loading: verifiedLoading, error: verifiedError } = useVerifiedManufacturers();
 
-  // Use real data from API
-  const stats = statsData?.stats || {};
-  const reports = reportsData?.data?.reports || [];
-  const unverifiedManufacturers = unverifiedData?.data?.manufacturers || [];
+  // Use real data from subgraph
+  const stats = statsData || {};
+  const reports = reportsData?.medicineBatches || [];
+  const unverifiedManufacturers = verifiedData?.manufacturers || [];
   
   // Check if user is admin
   const isAdmin = address && stats?.adminAddress && 
@@ -65,7 +53,7 @@ export default function AdminDashboard() {
   };
 
   // Show loading state
-  if (statsLoading || reportsLoading || unverifiedLoading) {
+  if (statsLoading || reportsLoading || verifiedLoading) {
     return (
       <div className={`min-h-screen font-sans transition-colors duration-500 ${
         darkMode ? 'bg-slate-950 text-white' : 'bg-white text-slate-900'
@@ -87,11 +75,11 @@ export default function AdminDashboard() {
   }
 
   // Show API error if backend is not available
-  const hasApiError = statsError || reportsError || unverifiedError;
+  const hasApiError = statsError || reportsError || verifiedError;
   const isBackendUnavailable = hasApiError && (
     statsError?.message?.includes('ECONNREFUSED') ||
     reportsError?.message?.includes('ECONNREFUSED') ||
-    unverifiedError?.message?.includes('ECONNREFUSED')
+    verifiedError?.message?.includes('ECONNREFUSED')
   );
 
   if (!isAdmin) {

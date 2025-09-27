@@ -209,6 +209,17 @@ export default function WalletConnect({ darkMode = true }) {
         }`}>
           {address?.slice(0, 6)}...{address?.slice(-4)}
         </div>
+        <a
+          href="/profile/edit"
+          className={`px-4 py-2 rounded-lg text-sm font-medium transition-all duration-300 hover:scale-105 ${
+            darkMode
+              ? 'bg-blue-500/20 text-blue-400 border border-blue-500/30 hover:bg-blue-500/30'
+              : 'bg-blue-50 text-blue-600 border border-blue-200 hover:bg-blue-100'
+          }`}
+          style={{ textDecoration: 'none' }}
+        >
+          Edit Profile
+        </a>
         <button
           onClick={() => disconnect()}
           className={`px-4 py-2 rounded-lg text-sm font-medium transition-all duration-300 hover:scale-105 ${

@@ -1,12 +1,3 @@
-import { StrictMode } from 'react';
-import { createRoot } from 'react-dom/client';
-import { createBrowserRouter, RouterProvider } from 'react-router-dom';
-import { WagmiProvider, createConfig, http } from 'wagmi';
-import { mainnet, sepolia } from 'wagmi/chains';
-import { injected, metaMask, walletConnect, coinbaseWallet } from 'wagmi/connectors';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import './style.css'
-
 // Import your pages
 import App from './App.jsx';
 import ErrorBoundary from './components/ErrorBoundary.jsx';
@@ -23,6 +14,7 @@ import BatchDetail from './pages/BatchDetail.jsx';
 import RecallBatch from './pages/RecallBatch.jsx';
 import ExpiredReports from './pages/ExpiredReports.jsx';
 import AdminDashboard from './pages/AdminDashboard.jsx';
+import ProfileEdit from './pages/ProfileEdit.jsx';
 
 // Wagmi and QueryClient setup
 const chainId = Number(import.meta.env.VITE_CHAIN_ID || 11155111);
@@ -61,7 +53,8 @@ const router = createBrowserRouter([
       { path: 'batch/:batchId', element: <BatchDetail /> },
       { path: 'batch/:batchId/recall', element: <RecallBatch /> },
       { path: 'reports/expired', element: <ExpiredReports /> },
-      { path: 'admin', element: <AdminDashboard /> },
+  { path: 'admin', element: <AdminDashboard /> },
+  { path: 'profile/edit', element: <ProfileEdit /> },
     ],
   },
 ]);

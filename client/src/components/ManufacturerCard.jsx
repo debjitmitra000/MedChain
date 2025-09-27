@@ -175,9 +175,13 @@ const ManufacturerCard = ({
           <div className="flex items-center mt-3 space-x-4">
             <div className="text-xs text-gray-500 dark:text-gray-400">
               <span className="font-medium">Address:</span>{' '}
-              <span className="font-mono">
-                {manufacturer.address.slice(0, 6)}...{manufacturer.address.slice(-4)}
-              </span>
+              {manufacturer.address || manufacturer.wallet || manufacturer.id ? (
+                <span className="font-mono">
+                  {(manufacturer.address || manufacturer.wallet || manufacturer.id).slice(0, 6)}...{(manufacturer.address || manufacturer.wallet || manufacturer.id).slice(-4)}
+                </span>
+              ) : (
+                <span className="text-red-500">Invalid Ethereum address format<br/>This manufacturer may not be registered in the system.</span>
+              )}
             </div>
 
             {profileData?.website && (
