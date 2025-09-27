@@ -31,7 +31,6 @@ class ErrorBoundary extends React.Component {
           backgroundColor: '#fef2f2',
           border: '2px solid #ef4444',
           borderRadius: '8px',
-          margin: '20px',
           maxWidth: '600px',
           margin: '20px auto'
         }}>
