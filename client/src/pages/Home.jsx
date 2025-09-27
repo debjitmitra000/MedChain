@@ -1,14 +1,48 @@
+import React, { useState, useEffect } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { Link } from 'react-router-dom';
 import { getGlobalStats } from '../api/verify';
 import { useRole } from '../hooks/useRole';
+import { useTheme } from '../contexts/ThemeContext'; // Add this import
+import {
+  Shield,
+  Users,
+  AlertTriangle,
+  BarChart3,
+  CheckCircle2,
+  Clock,
+  TrendingUp,
+  Activity,
+  Server,
+  Globe,
+  ExternalLink,
+  ArrowRight,
+  AlertCircle,
+  Database,
+  Wifi,
+  WifiOff,
+  Settings,
+  Package,
+  UserPlus,
+  Search,
+  Factory,
+  Eye,
+  Plus,
+  Wallet,
+  Home as HomeIcon,
+  Bell,
+  ChevronRight,
+} from 'lucide-react';
 
 export default function Home() {
+  const { darkMode } = useTheme(); // Use shared theme context
+  const [expandedCard, setExpandedCard] = useState(null);
+  
   const { data, isLoading, error } = useQuery({
     queryKey: ['stats'],
     queryFn: getGlobalStats,
-    retry: false, // Don't retry on error
-    staleTime: 30000, // Cache for 30 seconds
+    retry: false,
+    staleTime: 30000,
   });
 
   const { 
@@ -22,281 +56,430 @@ export default function Home() {
     canRegisterAsManufacturer
   } = useRole();
 
-  // Use real data from API
   const stats = data?.stats || {};
   const isBackendUnavailable = error && error.message?.includes('ECONNREFUSED');
 
   if (isLoading) {
     return (
-      <div style={{ padding: '40px', textAlign: 'center' }}>
-        <div style={{ 
-          display: 'inline-block',
-          width: '40px',
-          height: '40px',
-          border: '4px solid #f3f3f3',
-          borderTop: '4px solid #4f46e5',
-          borderRadius: '50%',
-          animation: 'spin 1s linear infinite'
-        }}></div>
-        <p style={{ marginTop: '16px', color: '#666' }}>Loading system stats...</p>
-        <style>{`
-          @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-          }
-        `}</style>
+      <div className={`min-h-screen font-sans transition-colors duration-500 ${
+        darkMode ? 'bg-slate-950 text-white' : 'bg-white text-slate-900'
+      }`}>
+        <div className="flex items-center justify-center min-h-screen">
+          <div className="text-center">
+            <div className="relative">
+              <div className={`w-16 h-16 border-4 rounded-full animate-spin ${
+                darkMode ? 'border-slate-600 border-t-emerald-400' : 'border-slate-300 border-t-emerald-500'
+              }`}></div>
+            </div>
+            <p className={`mt-6 text-lg ${darkMode ? 'text-slate-300' : 'text-slate-600'}`}>
+              Loading system dashboard...
+            </p>
+          </div>
+        </div>
       </div>
     );
   }
 
-  const renderRoleBasedActions = () => {
+  // Role-based welcome messages and colors
+  const getRoleInfo = () => {
     if (isAdmin) {
-      return (
-        <div style={{ marginBottom: 24 }}>
-          <h3>Admin Quick Actions</h3>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: 12 }}>
-            <Link to="/admin">
-              <button style={{ backgroundColor: '#ff6600', color: 'white', padding: '12px 24px', width: '100%' }}>
-                🔧 Admin Dashboard
-              </button>
-            </Link>
-            <Link to="/manufacturer/verify">
-              <button style={{ backgroundColor: '#00aa00', color: 'white', padding: '12px 24px', width: '100%' }}>
-                ✅ Verify Manufacturers
-              </button>
-            </Link>
-            <Link to="/manufacturer/list?status=unverified">
-              <button style={{ backgroundColor: '#ff8800', color: 'white', padding: '12px 24px', width: '100%' }}>
-                ⏳ Pending Approvals
-              </button>
-            </Link>
-            <Link to="/reports/expired">
-              <button style={{ backgroundColor: '#ff4444', color: 'white', padding: '12px 24px', width: '100%' }}>
-                📊 Expired Reports
-              </button>
-            </Link>
-          </div>
-        </div>
-      );
+      return {
+        title: 'Admin Control Center',
+        subtitle: 'Complete system oversight and management',
+        color: 'from-purple-500 to-purple-600',
+        icon: Shield,
+        badge: 'Admin',
+        badgeColor: 'bg-purple-500/20 text-purple-400 border-purple-500/30'
+      };
     }
-    
     if (isManufacturer) {
-      return (
-        <div style={{ marginBottom: 24 }}>
-          <h3>Manufacturer Dashboard</h3>
-          
-          {/* Status Alert */}
-          <div style={{ 
-            marginBottom: 16,
-            padding: 12,
-            backgroundColor: manufacturer?.isVerified ? '#d4edda' : '#fff3cd',
-            border: `1px solid ${manufacturer?.isVerified ? '#c3e6cb' : '#ffeaa7'}`,
-            borderRadius: 4
-          }}>
-            <p style={{ margin: 0, color: manufacturer?.isVerified ? '#155724' : '#856404' }}>
-              <strong>Status:</strong> {manufacturer?.isVerified ? '✅ Verified & Active' : '⏳ Pending Admin Verification'}
-            </p>
-          </div>
-          
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: 12 }}>
-            <Link to="/manufacturer/me">
-              <button style={{ backgroundColor: '#0088aa', color: 'white', padding: '12px 24px', width: '100%' }}>
-                👤 My Profile
-              </button>
-            </Link>
-            <Link to="/manufacturer/me/batches">
-              <button style={{ backgroundColor: '#3182ce', color: 'white', padding: '12px 24px', width: '100%' }}>
-                📦 My Batches
-              </button>
-            </Link>
-            {canRegisterBatch && (
-              <Link to="/batch/register">
-                <button style={{ backgroundColor: '#38a169', color: 'white', padding: '12px 24px', width: '100%' }}>
-                  + Register Batch
-                </button>
-              </Link>
-            )}
-            {!manufacturer?.isVerified && (
-              <div style={{ gridColumn: '1 / -1' }}>
-                <div style={{ 
-                  padding: 12, 
-                  backgroundColor: '#e7f3ff',
-                  border: '1px solid #b3d9ff',
-                  borderRadius: 4,
-                  textAlign: 'center'
-                }}>
-                  <p style={{ margin: 0, color: '#0056b3' }}>
-                    ⏳ Awaiting verification to register medicine batches
-                  </p>
-                </div>
-              </div>
-            )}
-          </div>
-        </div>
+      return {
+        title: 'Manufacturer Dashboard',
+        subtitle: manufacturer?.isVerified 
+          ? 'Manage your medicine batches and production'
+          : 'Complete verification to start registering batches',
+        color: 'from-blue-500 to-blue-600',
+        icon: Factory,
+        badge: manufacturer?.isVerified ? 'Verified Manufacturer' : 'Pending Verification',
+        badgeColor: manufacturer?.isVerified 
+          ? 'bg-emerald-500/20 text-emerald-400 border-emerald-500/30'
+          : 'bg-amber-500/20 text-amber-400 border-amber-500/30'
+      };
+    }
+    return {
+      title: 'Medicine Verification System',
+      subtitle: 'Verify medicines and explore the healthcare ecosystem',
+      color: 'from-emerald-500 to-emerald-600',
+      icon: HomeIcon,
+      badge: isConnected ? 'Connected User' : 'Guest User',
+      badgeColor: isConnected
+        ? 'bg-emerald-500/20 text-emerald-400 border-emerald-500/30'
+        : 'bg-slate-500/20 text-slate-400 border-slate-500/30'
+    };
+  };
+
+  const roleInfo = getRoleInfo();
+  const RoleIcon = roleInfo.icon;
+
+  const renderQuickActions = () => {
+    const actions = [];
+    
+    if (isAdmin) {
+      actions.push(
+        { to: '/admin', icon: Settings, title: 'Admin Dashboard', desc: 'Full system management', color: 'purple' },
+        { to: '/manufacturer/verify', icon: CheckCircle2, title: 'Verify Manufacturers', desc: 'Review pending applications', color: 'emerald' },
+        { to: '/manufacturer/list?status=unverified', icon: Clock, title: 'Pending Approvals', desc: 'Manufacturers awaiting verification', color: 'amber' },
+        { to: '/reports/expired', icon: BarChart3, title: 'System Reports', desc: 'View expired medicine reports', color: 'red' }
       );
+    } else if (isManufacturer) {
+      actions.push(
+        { to: '/manufacturer/me', icon: Users, title: 'My Profile', desc: 'Manage manufacturer details', color: 'blue' },
+        { to: '/manufacturer/me/batches', icon: Package, title: 'My Batches', desc: 'View registered medicine batches', color: 'cyan' }
+      );
+      
+      if (canRegisterBatch) {
+        actions.push(
+          { to: '/batch/register', icon: Plus, title: 'Register Batch', desc: 'Add new medicine batch', color: 'emerald' }
+        );
+      }
+    } else {
+      actions.push(
+        { to: '/verify', icon: Search, title: 'Verify Medicine', desc: 'Scan and verify medicine authenticity', color: 'emerald' },
+        { to: '/manufacturer/list', icon: Factory, title: 'Manufacturers', desc: 'Browse registered manufacturers', color: 'blue' },
+        { to: '/reports/expired', icon: BarChart3, title: 'Safety Reports', desc: 'View expired medicine alerts', color: 'amber' }
+      );
+      
+      if (canRegisterAsManufacturer && isConnected) {
+        actions.push(
+          { to: '/manufacturer/register', icon: UserPlus, title: 'Register as Manufacturer', desc: 'Join the manufacturer network', color: 'indigo' }
+        );
+      }
     }
     
-    // User or Guest actions
-    return (
-      <div style={{ marginBottom: 24 }}>
-        <h3>Quick Actions</h3>
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: 12 }}>
-          <Link to="/verify">
-            <button style={{ backgroundColor: '#00aa00', color: 'white', padding: '12px 24px', width: '100%' }}>
-              🔍 Verify Medicine
-            </button>
-          </Link>
-          <Link to="/manufacturer/list">
-            <button style={{ backgroundColor: '#0088aa', color: 'white', padding: '12px 24px', width: '100%' }}>
-              🏭 View Manufacturers
-            </button>
-          </Link>
-          <Link to="/reports/expired">
-            <button style={{ backgroundColor: '#ff8800', color: 'white', padding: '12px 24px', width: '100%' }}>
-              📊 Expired Reports
-            </button>
-          </Link>
-          {canRegisterAsManufacturer && isConnected && (
-            <Link to="/manufacturer/register">
-              <button style={{ backgroundColor: '#6366f1', color: 'white', padding: '12px 24px', width: '100%' }}>
-                🏭 Register as Manufacturer
-              </button>
-            </Link>
-          )}
-        </div>
-        
-        {!isConnected && (
-          <div style={{ 
-            marginTop: 16, 
-            padding: 12, 
-            backgroundColor: '#f8f9fa',
-            border: '1px solid #dee2e6',
-            borderRadius: 4,
-            textAlign: 'center'
-          }}>
-            <p style={{ margin: 0, color: '#6c757d' }}>
-              💡 Connect your wallet to access manufacturer features
-            </p>
-          </div>
-        )}
-      </div>
-    );
+    return actions;
+  };
+
+  const getColorClasses = (color) => {
+    const colors = {
+      purple: 'from-purple-500/10 to-purple-600/10 border-purple-500/30 hover:border-purple-500/50',
+      emerald: 'from-emerald-500/10 to-emerald-600/10 border-emerald-500/30 hover:border-emerald-500/50',
+      amber: 'from-amber-500/10 to-amber-600/10 border-amber-500/30 hover:border-amber-500/50',
+      red: 'from-red-500/10 to-red-600/10 border-red-500/30 hover:border-red-500/50',
+      blue: 'from-blue-500/10 to-blue-600/10 border-blue-500/30 hover:border-blue-500/50',
+      cyan: 'from-cyan-500/10 to-cyan-600/10 border-cyan-500/30 hover:border-cyan-500/50',
+      indigo: 'from-indigo-500/10 to-indigo-600/10 border-indigo-500/30 hover:border-indigo-500/50',
+    };
+    return colors[color] || colors.emerald;
+  };
+
+  const getIconColor = (color) => {
+    const colors = {
+      purple: 'text-purple-500',
+      emerald: 'text-emerald-500',
+      amber: 'text-amber-500',
+      red: 'text-red-500',
+      blue: 'text-blue-500',
+      cyan: 'text-cyan-500',
+      indigo: 'text-indigo-500',
+    };
+    return colors[color] || colors.emerald;
   };
 
   return (
-    <div style={{ padding: '20px', maxWidth: '1200px', margin: '0 auto' }}>
-      {/* API Error */}
-      {isBackendUnavailable && (
-        <div style={{ 
-          marginBottom: '24px',
-          padding: '16px',
-          backgroundColor: '#fef2f2',
-          border: '2px solid #ef4444',
-          borderRadius: '8px'
-        }}>
-          <h4 style={{ margin: '0 0 8px 0', color: '#dc2626' }}>
-            ❌ Backend Server Not Available
-          </h4>
-          <p style={{ margin: '0 0 8px 0', color: '#dc2626' }}>
-            Cannot connect to backend server. Please start the backend server on port 5000.
-          </p>
-          <p style={{ margin: '0', color: '#dc2626', fontSize: '14px' }}>
-            Run: <code style={{ backgroundColor: '#f3f4f6', padding: '2px 4px', borderRadius: '3px' }}>npm run backend</code>
-          </p>
-        </div>
-      )}
+    <div className={`min-h-screen font-sans transition-colors duration-500 ${
+      darkMode ? 'bg-slate-950 text-white' : 'bg-white text-slate-900'
+    }`}>
+      {/* Floating Geometric Shapes Background */}
+      <div className="absolute inset-0 overflow-hidden pointer-events-none">
+        <div className="absolute top-20 left-10 w-16 h-16 bg-emerald-500/5 rounded-full animate-pulse"></div>
+        <div className="absolute top-40 right-20 w-8 h-8 bg-blue-500/10 rotate-45 animate-spin" style={{ animationDuration: '8s' }}></div>
+        <div className="absolute bottom-32 left-20 w-12 h-12 bg-purple-500/5 rounded-full animate-bounce" style={{ animationDelay: '1s' }}></div>
+        <div className="absolute bottom-40 right-10 w-6 h-6 bg-amber-500/10 rotate-12 animate-pulse" style={{ animationDelay: '2s' }}></div>
+      </div>
 
-      <h2 style={{ marginBottom: '24px', color: '#1f2937' }}>🏥 Medicine Verification System</h2>
-      
-      {/* Role-based greeting */}
-      <div style={{ marginBottom: '24px' }}>
-        {isConnected && (
-          <div style={{ 
-            padding: '16px', 
-            backgroundColor: '#f0f9ff',
-            border: '1px solid #0ea5e9',
-            borderRadius: '8px' 
-          }}>
-            <p style={{ margin: 0, color: '#0c4a6e' }}>
-              Welcome back, <strong>{role === 'admin' ? 'Admin' : role === 'manufacturer' ? manufacturer?.name || 'Manufacturer' : 'User'}</strong>! 
-              {role === 'admin' && ' You have full system access.'}
-              {role === 'manufacturer' && manufacturer?.isVerified && ' You can register medicine batches.'}
-              {role === 'manufacturer' && !manufacturer?.isVerified && ' Pending verification to register batches.'}
-              {role === 'user' && ' You can verify medicines and register as a manufacturer.'}
-            </p>
+      <div className="relative max-w-7xl mx-auto px-6 py-8">
+        {/* API Error Alert */}
+        {isBackendUnavailable && (
+          <div className={`mb-8 p-6 rounded-2xl border-2 ${
+            darkMode 
+              ? 'bg-red-500/10 border-red-500/30 backdrop-blur-sm' 
+              : 'bg-red-50 border-red-200'
+          }`}>
+            <div className="flex items-start gap-4">
+              <WifiOff className="w-6 h-6 text-red-500 flex-shrink-0 mt-1" />
+              <div>
+                <h4 className="text-lg font-semibold text-red-500 mb-2">
+                  Backend Server Unavailable
+                </h4>
+                <p className={`mb-3 ${darkMode ? 'text-slate-300' : 'text-slate-600'}`}>
+                  Cannot connect to the backend server. Please start the backend server on port 5000.
+                </p>
+                <code className={`px-3 py-1 rounded-lg text-sm font-mono ${
+                  darkMode ? 'bg-slate-800 text-emerald-400' : 'bg-slate-100 text-slate-700'
+                }`}>
+                  npm run backend
+                </code>
+              </div>
+            </div>
           </div>
         )}
-      </div>
 
-      {renderRoleBasedActions()}
-      
-      {/* System Overview */}
-      <div style={{ marginBottom: 24 }}>
-        <h3>System Overview</h3>
-        <div style={{ 
-          display: 'grid', 
-          gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
-          gap: 16,
-          marginBottom: 20
-        }}>
-          <div style={{ padding: 16, border: '2px solid #00aa00', borderRadius: 8, textAlign: 'center' }}>
-            <h4 style={{ margin: '0 0 8px 0', color: '#00aa00' }}>Total Batches</h4>
-            <p style={{ margin: 0, fontSize: '32px', fontWeight: 'bold' }}>
-              {stats.totalBatches || 0}
-            </p>
+        {/* Hero Section */}
+        <div className="text-center mb-16">
+          <div className={`inline-flex items-center gap-3 px-6 py-3 rounded-full mb-6 border ${
+            darkMode 
+              ? roleInfo.badgeColor
+              : roleInfo.badgeColor
+          }`}>
+            <RoleIcon className="w-5 h-5" />
+            <span className="font-medium">{roleInfo.badge}</span>
           </div>
           
-          <div style={{ padding: 16, border: '2px solid #0088aa', borderRadius: 8, textAlign: 'center' }}>
-            <h4 style={{ margin: '0 0 8px 0', color: '#0088aa' }}>Manufacturers</h4>
-            <p style={{ margin: 0, fontSize: '32px', fontWeight: 'bold' }}>
-              {stats.totalManufacturers || 0}
-            </p>
-          </div>
+          <h1 className={`text-5xl md:text-6xl font-bold mb-6 bg-gradient-to-r ${roleInfo.color} bg-clip-text text-transparent`}>
+            {roleInfo.title}
+          </h1>
           
-          <div style={{ padding: 16, border: '2px solid #ff8800', borderRadius: 8, textAlign: 'center' }}>
-            <h4 style={{ margin: '0 0 8px 0', color: '#ff8800' }}>Expired Scans</h4>
-            <p style={{ margin: 0, fontSize: '32px', fontWeight: 'bold' }}>
-              {stats.totalExpiredScans || 0}
-            </p>
+          <p className={`text-xl max-w-2xl mx-auto ${
+            darkMode ? 'text-slate-300' : 'text-slate-600'
+          }`}>
+            {roleInfo.subtitle}
+          </p>
+
+          {/* Welcome Message for Connected Users */}
+          {isConnected && (
+            <div className={`mt-8 p-6 rounded-2xl border ${
+              darkMode
+                ? 'bg-gradient-to-r from-emerald-500/10 to-emerald-600/10 border-emerald-500/30'
+                : 'bg-gradient-to-r from-emerald-50 to-emerald-100 border-emerald-200'
+            }`}>
+              <div className="flex items-center justify-center gap-3 mb-3">
+                <Wallet className="w-5 h-5 text-emerald-500" />
+                <span className={`font-semibold ${
+                  darkMode ? 'text-white' : 'text-slate-900'
+                }`}>
+                  Welcome back, {role === 'admin' ? 'Admin' : role === 'manufacturer' ? manufacturer?.name || 'Manufacturer' : 'User'}!
+                </span>
+              </div>
+              <p className={`text-sm ${darkMode ? 'text-slate-300' : 'text-slate-600'}`}>
+                {role === 'admin' && 'You have complete system access and can manage all aspects of MedChain.'}
+                {role === 'manufacturer' && manufacturer?.isVerified && 'Your manufacturer account is verified and active. You can register new batches.'}
+                {role === 'manufacturer' && !manufacturer?.isVerified && 'Your manufacturer account is pending admin verification.'}
+                {role === 'user' && 'You can verify medicines and apply to become a manufacturer.'}
+              </p>
+            </div>
+          )}
+
+          {/* Connection Prompt for Guests */}
+          {!isConnected && (
+            <div className={`mt-8 p-6 rounded-2xl border ${
+              darkMode
+                ? 'bg-slate-800/60 border-slate-700'
+                : 'bg-slate-50 border-slate-200'
+            }`}>
+              <Bell className={`w-8 h-8 mx-auto mb-3 ${
+                darkMode ? 'text-amber-400' : 'text-amber-500'
+              }`} />
+              <p className={`font-medium mb-2 ${
+                darkMode ? 'text-white' : 'text-slate-900'
+              }`}>
+                Connect Your Wallet
+              </p>
+              <p className={`text-sm ${darkMode ? 'text-slate-400' : 'text-slate-600'}`}>
+                Connect your wallet to access manufacturer features and personalized dashboard
+              </p>
+            </div>
+          )}
+        </div>
+
+        {/* Quick Actions Grid */}
+        <div className="mb-16">
+          <h2 className={`text-3xl font-bold mb-8 ${
+            darkMode ? 'text-white' : 'text-slate-900'
+          }`}>
+            Quick Actions
+          </h2>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+            {renderQuickActions().map((action, index) => (
+              <Link key={index} to={action.to} className="group">
+                <div className={`p-6 rounded-2xl border transition-all duration-300 hover:scale-105 ${
+                  darkMode
+                    ? `bg-gradient-to-br ${getColorClasses(action.color)}`
+                    : `bg-gradient-to-br ${getColorClasses(action.color)}`
+                }`}>
+                  <div className="flex items-center justify-between mb-4">
+                    <action.icon className={`w-8 h-8 ${getIconColor(action.color)}`} />
+                    <ArrowRight className={`w-5 h-5 ${getIconColor(action.color)} group-hover:translate-x-1 transition-transform`} />
+                  </div>
+                  <h3 className={`text-lg font-semibold mb-2 ${
+                    darkMode ? 'text-white' : 'text-slate-900'
+                  }`}>
+                    {action.title}
+                  </h3>
+                  <p className={`text-sm ${
+                    darkMode ? 'text-slate-400' : 'text-slate-600'
+                  }`}>
+                    {action.desc}
+                  </p>
+                </div>
+              </Link>
+            ))}
           </div>
-          
-          <div style={{ padding: 16, border: '2px solid #ff4444', borderRadius: 8, textAlign: 'center' }}>
-            <h4 style={{ margin: '0 0 8px 0', color: '#ff4444' }}>Recalled Batches</h4>
-            <p style={{ margin: 0, fontSize: '32px', fontWeight: 'bold' }}>
-              {stats.totalRecalledBatches || 0}
-            </p>
+        </div>
+
+        {/* Manufacturer Status Alert */}
+        {isManufacturer && !manufacturer?.isVerified && (
+          <div className={`mb-16 p-8 rounded-2xl border-2 ${
+            darkMode
+              ? 'bg-gradient-to-br from-amber-500/10 to-amber-600/10 border-amber-500/30 backdrop-blur-sm'
+              : 'bg-gradient-to-br from-amber-50 to-amber-100 border-amber-200'
+          }`}>
+            <div className="flex items-start gap-4">
+              <Clock className="w-8 h-8 text-amber-500 flex-shrink-0" />
+              <div>
+                <h3 className={`text-2xl font-bold mb-2 ${
+                  darkMode ? 'text-white' : 'text-slate-900'
+                }`}>
+                  Verification Pending
+                </h3>
+                <p className={`mb-4 ${darkMode ? 'text-slate-400' : 'text-slate-600'}`}>
+                  Your manufacturer application is under review by our admin team. You'll be able to register medicine batches once verified.
+                </p>
+                <div className="flex gap-3">
+                  <Link to="/manufacturer/me">
+                    <button className={`px-6 py-3 rounded-xl font-semibold transition-all duration-300 hover:scale-105 ${
+                      darkMode
+                        ? 'bg-slate-700 text-slate-300 hover:bg-slate-600 border border-slate-600'
+                        : 'bg-white text-slate-600 hover:bg-slate-50 border border-slate-300'
+                    }`}>
+                      View Profile
+                    </button>
+                  </Link>
+                </div>
+              </div>
+            </div>
           </div>
+        )}
+
+        {/* System Statistics */}
+        <div className="mb-16">
+          <h2 className={`text-3xl font-bold mb-8 ${
+            darkMode ? 'text-white' : 'text-slate-900'
+          }`}>
+            System Overview
+          </h2>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+            {[
+              { icon: Database, title: 'Total Batches', value: stats.totalBatches || 0, color: 'emerald', desc: 'Registered medicine batches' },
+              { icon: Factory, title: 'Manufacturers', value: stats.totalManufacturers || 0, color: 'blue', desc: 'Verified manufacturers' },
+              { icon: AlertTriangle, title: 'Expired Scans', value: stats.totalExpiredScans || 0, color: 'amber', desc: 'Medicines past expiry' },
+              { icon: AlertCircle, title: 'Recalled Batches', value: stats.totalRecalledBatches || 0, color: 'red', desc: 'Safety recalls issued' }
+            ].map((stat, index) => (
+              <div
+                key={index}
+                className={`p-8 rounded-2xl border shadow-lg hover:scale-105 transition-all duration-300 cursor-pointer ${
+                  darkMode
+                    ? `bg-gradient-to-br ${getColorClasses(stat.color)}`
+                    : `bg-gradient-to-br ${getColorClasses(stat.color)}`
+                }`}
+                onMouseEnter={() => setExpandedCard(index)}
+                onMouseLeave={() => setExpandedCard(null)}
+              >
+                <div className="flex items-center justify-between mb-4">
+                  <stat.icon className={`w-10 h-10 ${getIconColor(stat.color)}`} />
+                  <ChevronRight className={`w-5 h-5 transition-transform ${
+                    expandedCard === index ? 'rotate-90' : ''
+                  } ${getIconColor(stat.color)}`} />
+                </div>
+                <h3 className={`text-sm font-medium mb-2 ${
+                  darkMode ? `${stat.color === 'emerald' ? 'text-emerald-400' : stat.color === 'blue' ? 'text-blue-400' : stat.color === 'amber' ? 'text-amber-400' : 'text-red-400'}` 
+                  : `${stat.color === 'emerald' ? 'text-emerald-600' : stat.color === 'blue' ? 'text-blue-600' : stat.color === 'amber' ? 'text-amber-600' : 'text-red-600'}`
+                }`}>
+                  {stat.title}
+                </h3>
+                <p className={`text-3xl font-bold mb-2 ${
+                  darkMode ? 'text-white' : 'text-slate-900'
+                }`}>
+                  {stat.value.toLocaleString()}
+                </p>
+                <p className={`text-xs transition-all duration-300 ${
+                  expandedCard === index ? 'opacity-100' : 'opacity-60'
+                } ${darkMode ? 'text-slate-400' : 'text-slate-600'}`}>
+                  {stat.desc}
+                </p>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Common Actions Section */}
+        <div className="mb-16">
+          <h2 className={`text-3xl font-bold mb-8 ${
+            darkMode ? 'text-white' : 'text-slate-900'
+          }`}>
+            Essential Features
+          </h2>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            {[
+              { to: '/verify', icon: Search, title: 'Verify Medicine', desc: 'Scan QR codes to verify authenticity', color: 'emerald' },
+              { to: '/manufacturer/list', icon: Factory, title: 'Browse Manufacturers', desc: 'Explore verified manufacturers', color: 'blue' },
+              { to: '/reports/expired', icon: BarChart3, title: 'Safety Reports', desc: 'View expired medicine alerts', color: 'amber' }
+            ].map((action, index) => (
+              <Link key={index} to={action.to} className="group">
+                <div className={`p-8 rounded-2xl border transition-all duration-300 hover:scale-105 ${
+                  darkMode
+                    ? `bg-gradient-to-br ${getColorClasses(action.color)}`
+                    : `bg-gradient-to-br ${getColorClasses(action.color)}`
+                }`}>
+                  <div className="flex items-center justify-between mb-6">
+                    <action.icon className={`w-10 h-10 ${getIconColor(action.color)}`} />
+                    <ArrowRight className={`w-5 h-5 ${getIconColor(action.color)} group-hover:translate-x-1 transition-transform`} />
+                  </div>
+                  <h3 className={`text-xl font-semibold mb-3 ${
+                    darkMode ? 'text-white' : 'text-slate-900'
+                  }`}>
+                    {action.title}
+                  </h3>
+                  <p className={`${darkMode ? 'text-slate-400' : 'text-slate-600'}`}>
+                    {action.desc}
+                  </p>
+                </div>
+              </Link>
+            ))}
+          </div>
+        </div>
+
+        {/* System Technical Details - Collapsible */}
+        <div className={`rounded-2xl border transition-all duration-500 ${
+          darkMode
+            ? 'bg-slate-800/60 border-slate-700'
+            : 'bg-slate-50 border-slate-200'
+        }`}>
+          <details className="group">
+            <summary className={`cursor-pointer p-6 flex items-center justify-between hover:${
+              darkMode ? 'bg-slate-700/60' : 'bg-slate-100'
+            } rounded-2xl transition-colors`}>
+              <div className="flex items-center gap-3">
+                <Server className={`w-6 h-6 ${darkMode ? 'text-cyan-400' : 'text-cyan-600'}`} />
+                <h3 className={`text-lg font-semibold ${
+                  darkMode ? 'text-white' : 'text-slate-900'
+                }`}>
+                  System Technical Details
+                </h3>
+              </div>
+              <ChevronRight className={`w-5 h-5 transition-transform group-open:rotate-90 ${
+                darkMode ? 'text-slate-400' : 'text-slate-600'
+              }`} />
+            </summary>
+            <div className="p-6 pt-0">
+              <div className={`p-4 rounded-xl font-mono text-sm overflow-auto ${
+                darkMode ? 'bg-slate-900/60 text-slate-300' : 'bg-white text-slate-700'
+              }`}>
+                <pre>{JSON.stringify(stats, null, 2)}</pre>
+              </div>
+            </div>
+          </details>
         </div>
       </div>
-
-      {/* Common Actions */}
-      <div style={{ marginBottom: 24 }}>
-        <h3>Common Actions</h3>
-        <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap' }}>
-          <Link to="/verify">
-            <button style={{ backgroundColor: '#00aa00', color: 'white', padding: '12px 24px' }}>
-              🔍 Verify Medicine
-            </button>
-          </Link>
-          <Link to="/manufacturer/list">
-            <button style={{ backgroundColor: '#0088aa', color: 'white', padding: '12px 24px' }}>
-              🏭 View Manufacturers
-            </button>
-          </Link>
-          <Link to="/reports/expired">
-            <button style={{ backgroundColor: '#ff8800', color: 'white', padding: '12px 24px' }}>
-              📊 Expired Reports
-            </button>
-          </Link>
-        </div>
-      </div>
-
-      <details style={{ marginTop: 20 }}>
-        <summary>System Technical Details</summary>
-        <div style={{ marginTop: 12, padding: 12, backgroundColor: '#f5f5f5', borderRadius: 4 }}>
-          <pre>{JSON.stringify(stats, null, 2)}</pre>
-        </div>
-      </details>
     </div>
   );
 }

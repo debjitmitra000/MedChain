@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useAccount } from 'wagmi';
 import { useRole } from './hooks/useRole';
 import WalletConnect from './components/WalletConnect.jsx';
+import { useTheme } from './contexts/ThemeContext';
 import {
   Sun,
   Moon,
@@ -31,7 +32,7 @@ export default function LandingPage() {
   const { isConnected } = useAccount();
   const { role, isAdmin, isManufacturer } = useRole();
   
-  const [darkMode, setDarkMode] = useState(true);
+  const { darkMode, toggleTheme } = useTheme();
   const [scrollY, setScrollY] = useState(0);
   const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
   const heroRef = useRef(null);
@@ -122,9 +123,6 @@ export default function LandingPage() {
     return () => observer.disconnect();
   }, []);
 
-  const toggleTheme = () => {
-    setDarkMode(!darkMode);
-  };
 
   const scrollToSection = (sectionId) => {
     document.getElementById(sectionId)?.scrollIntoView({ behavior: "smooth" });
