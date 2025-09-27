@@ -20,6 +20,10 @@ import {
   Smartphone,
   Cloud,
   CheckCircle,
+  Server,
+  FileText,
+  Globe2,
+  GitBranch,
 } from "lucide-react";
 
 export default function LandingPage() {
@@ -32,7 +36,7 @@ export default function LandingPage() {
   const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
   const heroRef = useRef(null);
   const featuresRef = useRef(null);
-  const statsRef = useRef(null);
+  const stackRef = useRef(null);
   const aboutRef = useRef(null);
   const ctaRef = useRef(null);
   const qrRef = useRef(null);
@@ -108,7 +112,7 @@ export default function LandingPage() {
     const observer = new IntersectionObserver(animateOnScroll, observerOptions);
 
     // Observe all sections when they're available
-    const sections = [statsRef, featuresRef, aboutRef, ctaRef];
+    const sections = [stackRef, featuresRef, aboutRef, ctaRef];
     sections.forEach((ref) => {
       if (ref.current) {
         observer.observe(ref.current);
@@ -151,10 +155,10 @@ export default function LandingPage() {
       {/* Theme Toggle Button */}
       <button
         onClick={toggleTheme}
-        className={`fixed top-6 right-6 z-50 p-3 rounded-full transition-all duration-300 backdrop-blur-sm ${
+        className={`fixed top-6 right-6 z-50 p-3 rounded-full transition-all duration-300 backdrop-blur-sm hover:scale-105 ${
           darkMode
-            ? "bg-slate-800/80 hover:bg-slate-700/80 text-[#00b9d1]"
-            : "bg-slate-100/80 hover:bg-slate-200/80 text-slate-700"
+            ? "bg-slate-800/80 hover:bg-slate-700/80 text-cyan-400 shadow-lg shadow-cyan-400/20"
+            : "bg-white/80 hover:bg-slate-50/80 text-slate-700 shadow-lg shadow-slate-300/30"
         }`}
       >
         {darkMode ? <Sun size={24} /> : <Moon size={24} />}
@@ -401,18 +405,14 @@ export default function LandingPage() {
             >
               Decentralized Medicine Authentication & Expiry Tracking
             </p>
-            <p
-              className={`text-xs sm:text-sm md:text-base lg:text-lg xl:text-xl transition-colors duration-500 leading-relaxed ${
-                darkMode ? "text-slate-400" : "text-slate-500"
-              }`}
-            >
-              Securing global healthcare with blockchain technology
-            </p>
+            
           </div>
           
-          {/* Connect Wallet Button */}
-          <div className="flex flex-col items-center gap-4">
-            <WalletConnect />
+          {/* Connect Wallet Button - Centered */}
+          <div className="w-full flex flex-col items-center justify-center gap-4">
+            <div className="flex justify-center">
+              <WalletConnect />
+            </div>
             
             {/* Info text */}
             <p className={`text-xs md:text-sm transition-colors duration-500 ${
@@ -425,7 +425,7 @@ export default function LandingPage() {
 
         {/* Enhanced Scroll Indicator */}
         <div
-          onClick={() => scrollToSection("stats")}
+          onClick={() => scrollToSection("stack")}
           className="absolute bottom-1 left-1/2 transform -translate-x-1/2 cursor-pointer group z-40"
         >
           <div
@@ -448,70 +448,71 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* Stats Section */}
+      {/* Technology Stack Section */}
       <section
-        ref={statsRef}
-        id="stats"
+        ref={stackRef}
+        id="stack"
         className={`py-20 px-6 opacity-0 translate-y-10 transition-all duration-1000 ease-out ${
           darkMode ? "bg-slate-900/50" : "bg-slate-50/50"
         }`}
       >
         <div className="max-w-6xl mx-auto">
           <h2 className="text-3xl md:text-4xl font-bold text-center mb-16">
-            <span className="text-emerald-400">MedChain</span> by the Numbers
+            Powered by <span className="text-emerald-400">Web3 Infrastructure</span>
           </h2>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-6 md:gap-8">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 md:gap-12">
             {[
               {
-                icon: Database,
-                value: "500K+",
-                label: "Medicines Verified",
-                color: "text-cyan-400",
-              },
-              {
-                icon: Users,
-                value: "10K+",
-                label: "Healthcare Partners",
-                color: "text-emerald-400",
-              },
-              {
-                icon: Award,
-                value: "99.9%",
-                label: "Accuracy Rate",
+                icon: FileText,
+                title: "Lighthouse Storage",
+                description: "Permanent decentralized storage powered by Filecoin and IPFS for immutable medicine records",
                 color: "text-blue-400",
+                bgGradient: "from-blue-500/10 to-blue-600/10",
               },
               {
-                icon: TrendingUp,
-                value: "50+",
-                label: "Countries",
-                color: "text-purple-400",
+                icon: Globe2,
+                title: "ENS Integration",
+                description: "Human-readable names for manufacturers and healthcare providers using Ethereum Name Service",
+                color: "text-purple-400", 
+                bgGradient: "from-purple-500/10 to-purple-600/10",
               },
-            ].map((stat, index) => (
+              {
+                icon: GitBranch,
+                title: "The Graph Protocol",
+                description: "Decentralized indexing for fast queries and real-time analytics of medicine supply chain data",
+                color: "text-cyan-400",
+                bgGradient: "from-cyan-500/10 to-cyan-600/10",
+              },
+            ].map((tech, index) => (
               <div
                 key={index}
-                className={`text-center animate-on-scroll opacity-0 translate-y-4 transition-all duration-700 ease-out p-4 md:p-6 rounded-xl ${
+                className={`animate-on-scroll opacity-0 translate-y-4 scale-95 transition-all duration-700 ease-out p-8 rounded-2xl shadow-lg hover:scale-105 group ${
                   darkMode
-                    ? "bg-slate-800/60 hover:bg-slate-700/60"
-                    : "bg-white/80 hover:bg-white shadow-md"
+                    ? `bg-gradient-to-br ${tech.bgGradient} backdrop-blur-sm border border-slate-700/50 hover:border-slate-600/50`
+                    : `bg-gradient-to-br ${tech.bgGradient} backdrop-blur-sm border border-slate-200/50 hover:border-slate-300/50`
                 }`}
               >
-                <stat.icon
-                  className={`mx-auto mb-3 md:mb-4 ${stat.color}`}
-                  size={32}
-                />
-                <div
-                  className={`text-2xl md:text-3xl lg:text-4xl font-bold mb-2 ${
-                    darkMode ? "text-white" : "text-slate-900"
-                  }`}
-                >
-                  {stat.value}
-                </div>
-                <div
-                  className={`text-sm md:text-base ${
-                    darkMode ? "text-slate-300" : "text-slate-700"
-                  }`}
-                >
-                  {stat.label}
+                <div className="flex flex-col items-center text-center">
+                  <div className={`p-4 rounded-full ${darkMode ? 'bg-slate-800/60' : 'bg-white/60'} mb-4 group-hover:scale-110 transition-transform`}>
+                    <tech.icon
+                      className={`${tech.color}`}
+                      size={32}
+                    />
+                  </div>
+                  <h3
+                    className={`text-xl font-semibold mb-4 transition-colors duration-500 ${
+                      darkMode ? "text-white" : "text-slate-900"
+                    }`}
+                  >
+                    {tech.title}
+                  </h3>
+                  <p
+                    className={`text-sm leading-relaxed transition-colors duration-500 ${
+                      darkMode ? "text-slate-300" : "text-slate-700"
+                    }`}
+                  >
+                    {tech.description}
+                  </p>
                 </div>
               </div>
             ))}
@@ -602,7 +603,7 @@ export default function LandingPage() {
       >
         <div className="max-w-6xl mx-auto">
           <h2 className="text-3xl md:text-4xl font-bold text-center mb-16">
-            Powered by{" "}
+            Built with{" "}
             <span className="text-emerald-400">Advanced Technology</span>
           </h2>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8">
@@ -670,7 +671,7 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* CTA Section */}
+      {/* CTA Section - Fixed Button Alignment */}
       <section
         ref={ctaRef}
         className={`py-24 px-6 opacity-0 translate-y-10 transition-all duration-1000 ease-out ${
@@ -696,12 +697,21 @@ export default function LandingPage() {
             Join thousands of healthcare providers, manufacturers, and
             regulators who trust MedChain for medicine authentication.
           </p>
-          <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <WalletConnect />
+          
+          {/* Fixed Button Container with Proper Centering */}
+          <div className="w-full flex flex-col sm:flex-row items-center justify-center gap-4">
+            {/* Connect Wallet Button */}
+            <div className="flex justify-center">
+              <WalletConnect />
+            </div>
+            
+            {/* Learn More Button with Consistent Styling */}
             <button
               onClick={() => scrollToSection("features")}
-              className={`px-8 py-4 border-2 border-emerald-500 rounded-full text-lg font-semibold hover:bg-emerald-500 hover:text-white transition-all duration-300 ${
-                darkMode ? "text-emerald-400" : "text-emerald-600"
+              className={`px-8 py-4 border-2 rounded-full text-lg font-semibold transition-all duration-300 hover:scale-105 ${
+                darkMode
+                  ? "border-emerald-500 text-emerald-400 hover:bg-emerald-500 hover:text-white shadow-lg shadow-emerald-500/20"
+                  : "border-emerald-500 text-emerald-600 hover:bg-emerald-500 hover:text-white shadow-lg shadow-emerald-500/20"
               }`}
             >
               Learn More

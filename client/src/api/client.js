@@ -7,7 +7,7 @@ export const api = axios.create({
   baseURL,
   withCredentials: false,
   headers: { 'Content-Type': 'application/json' },
-  timeout: 10000, // 10 second timeout
+  timeout: 80000, // 10 second timeout
 });
 
 // Request interceptor for logging
