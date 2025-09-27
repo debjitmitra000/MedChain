@@ -1,4 +1,8 @@
 import React, { useState, useEffect, useRef } from "react";
+import { useNavigate } from 'react-router-dom';
+import { useAccount } from 'wagmi';
+import { useRole } from './hooks/useRole';
+import WalletConnect from './components/WalletConnect.jsx';
 import {
   Sun,
   Moon,
@@ -19,6 +23,10 @@ import {
 } from "lucide-react";
 
 export default function LandingPage() {
+  const navigate = useNavigate();
+  const { isConnected } = useAccount();
+  const { role, isAdmin, isManufacturer } = useRole();
+  
   const [darkMode, setDarkMode] = useState(true);
   const [scrollY, setScrollY] = useState(0);
   const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
@@ -28,6 +36,24 @@ export default function LandingPage() {
   const aboutRef = useRef(null);
   const ctaRef = useRef(null);
   const qrRef = useRef(null);
+
+  // Handle navigation after wallet connection
+  useEffect(() => {
+    if (isConnected) {
+      // Small delay to ensure role is properly detected
+      const timer = setTimeout(() => {
+        if (isAdmin) {
+          navigate('/admin');
+        } else if (isManufacturer) {
+          navigate('/manufacturer/me');
+        } else {
+          navigate('/verify');
+        }
+      }, 500);
+      
+      return () => clearTimeout(timer);
+    }
+  }, [isConnected, isAdmin, isManufacturer, navigate]);
 
   useEffect(() => {
     const handleScroll = () => setScrollY(window.scrollY);
@@ -41,10 +67,10 @@ export default function LandingPage() {
         const qrRect = qrRef.current.getBoundingClientRect();
         const qrCenterX = qrRect.left + qrRect.width / 2;
         const qrCenterY = qrRect.top + qrRect.height / 2;
-        
+
         setMousePosition({
           x: e.clientX - qrCenterX,
-          y: e.clientY - qrCenterY
+          y: e.clientY - qrCenterY,
         });
       }
     };
@@ -105,10 +131,12 @@ export default function LandingPage() {
     const distance = Math.sqrt(mousePosition.x ** 2 + mousePosition.y ** 2);
     const maxDistance = 300; // Max distance to consider for eye movement
     const normalizedDistance = Math.min(distance / maxDistance, 1);
-    
-    const eyeX = (mousePosition.x / maxDistance) * maxMovement * normalizedDistance;
-    const eyeY = (mousePosition.y / maxDistance) * maxMovement * normalizedDistance;
-    
+
+    const eyeX =
+      (mousePosition.x / maxDistance) * maxMovement * normalizedDistance;
+    const eyeY =
+      (mousePosition.y / maxDistance) * maxMovement * normalizedDistance;
+
     return { x: eyeX, y: eyeY };
   };
 
@@ -226,79 +254,95 @@ export default function LandingPage() {
         {/* Main Content */}
         <div className="relative w-full h-full flex items-center justify-center">
           {/* Animated QR Code Character */}
-          <div 
+          <div
             ref={qrRef}
-            className="absolute top-[15%] left-1/2 transform -translate-x-1/2 z-10 animate-qrFloat"
+            className="absolute top-[15%] left-1/2 -translate-x-1/2 z-10 animate-qrFloat flex justify-center"
           >
-            <div className={`relative w-24 h-24 sm:w-28 sm:h-28 md:w-32 md:h-32 p-2 rounded-lg ${
-              darkMode ? "bg-white" : "bg-slate-900"
-            } shadow-lg hover:scale-110 transition-all duration-300`}>
+            <div
+              className={`relative w-24 h-24 sm:w-28 sm:h-28 md:w-32 md:h-32 p-2 rounded-lg ${
+                darkMode ? "bg-white" : "bg-slate-900"
+              } shadow-lg hover:scale-110 transition-all duration-300`}
+            >
               {/* QR Code Pattern */}
               <div className="w-full h-full grid grid-cols-8 gap-[1px]">
-                {/* Generate QR-like pattern */}
                 {Array.from({ length: 64 }, (_, i) => {
-                  const isCornerSquare = 
-                    (i < 21 && (i % 8) < 3) || // Top-left
-                    (i < 21 && (i % 8) > 4) || // Top-right
-                    (i > 42 && (i % 8) < 3); // Bottom-left
-                  const isRandomPattern = Math.random() > 0.4 && !isCornerSquare;
-                  
+                  const isCornerSquare =
+                    (i < 21 && i % 8 < 3) || // Top-left
+                    (i < 21 && i % 8 > 4) || // Top-right
+                    (i > 42 && i % 8 < 3); // Bottom-left
+                  const isRandomPattern =
+                    Math.random() > 0.4 && !isCornerSquare;
+
                   return (
                     <div
                       key={i}
                       className={`aspect-square ${
                         isCornerSquare || isRandomPattern
-                          ? darkMode ? "bg-slate-900" : "bg-white"
-                          : darkMode ? "bg-white" : "bg-slate-900"
+                          ? darkMode
+                            ? "bg-slate-900"
+                            : "bg-white"
+                          : darkMode
+                          ? "bg-white"
+                          : "bg-slate-900"
                       }`}
                     />
                   );
                 })}
               </div>
-              
-              {/* Animated Eyes */}
-              <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2">
+
+              {/* Animated Eyes (centered properly) */}
+              <div className="absolute inset-0 flex items-center justify-center gap-6 -top-6">
                 {/* Left Eye */}
-                <div className="absolute -left-10 -top-4">
-                  <div className={`w-8 h-8 rounded-full ${
-                    darkMode ? "bg-slate-900" : "bg-white"
-                  } border-2 ${
-                    darkMode ? "border-white" : "border-slate-900"
-                  } flex items-center justify-center animate-qrBlink overflow-hidden`}>
-                    <div 
-                      className={`w-3 h-3 rounded-full ${
-                        darkMode ? "bg-white" : "bg-slate-900"
-                      } transition-transform duration-100`}
-                      style={{
-                        transform: `translate(${Math.max(-1.5, Math.min(1.5, eyeMovement.x * 0.8))}px, ${Math.max(-1.5, Math.min(1.5, eyeMovement.y * 0.8))}px)`
-                      }}
-                    />
-                  </div>
-                </div>
-                
-                {/* Right Eye */}
-                <div className="absolute -right-2 -top-4">
-                  <div className={`w-8 h-8 rounded-full ${
+                <div
+                  className={`w-8 h-8 rounded-full ${
                     darkMode ? "bg-slate-900" : "bg-white"
                   } border-2 ${
                     darkMode ? "border-white" : "border-slate-900"
                   } flex items-center justify-center animate-qrBlink overflow-hidden`}
-                  style={{ animationDelay: "0.1s" }}>
-                    <div 
-                      className={`w-3 h-3 rounded-full ${
-                        darkMode ? "bg-white" : "bg-slate-900"
-                      } transition-transform duration-100`}
-                      style={{
-                        transform: `translate(${Math.max(-1.5, Math.min(1.5, eyeMovement.x * 0.8))}px, ${Math.max(-1.5, Math.min(1.5, eyeMovement.y * 0.8))}px)`
-                      }}
-                    />
-                  </div>
+                >
+                  <div
+                    className={`w-3 h-3 rounded-full ${
+                      darkMode ? "bg-white" : "bg-slate-900"
+                    } transition-transform duration-100`}
+                    style={{
+                      transform: `translate(${Math.max(
+                        -1.5,
+                        Math.min(1.5, eyeMovement.x * 0.8)
+                      )}px, ${Math.max(
+                        -1.5,
+                        Math.min(1.5, eyeMovement.y * 0.8)
+                      )}px)`,
+                    }}
+                  />
+                </div>
+
+                {/* Right Eye */}
+                <div
+                  className={`w-8 h-8 rounded-full ${
+                    darkMode ? "bg-slate-900" : "bg-white"
+                  } border-2 ${
+                    darkMode ? "border-white" : "border-slate-900"
+                  } flex items-center justify-center animate-qrBlink overflow-hidden`}
+                  style={{ animationDelay: "0.1s" }}
+                >
+                  <div
+                    className={`w-3 h-3 rounded-full ${
+                      darkMode ? "bg-white" : "bg-slate-900"
+                    } transition-transform duration-100`}
+                    style={{
+                      transform: `translate(${Math.max(
+                        -1.5,
+                        Math.min(1.5, eyeMovement.x * 0.8)
+                      )}px, ${Math.max(
+                        -1.5,
+                        Math.min(1.5, eyeMovement.y * 0.8)
+                      )}px)`,
+                    }}
+                  />
                 </div>
               </div>
             </div>
           </div>
-
-
 
           {/* MEDCHAIN Title */}
           <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-10">
@@ -365,16 +409,18 @@ export default function LandingPage() {
               Securing global healthcare with blockchain technology
             </p>
           </div>
-          <button
-            onClick={() => scrollToSection("features")}
-            className="px-4 sm:px-6 md:px-8 py-2.5 sm:py-3 md:py-4 bg-gradient-to-r from-cyan-500 to-emerald-500 rounded-full text-sm sm:text-base md:text-lg font-semibold shadow-lg hover:shadow-emerald-400/40 hover:scale-105 transition-all duration-300 inline-flex items-center gap-2 text-white group"
-          >
-            Explore Dashboard
-            <ArrowRight
-              size={16}
-              className="sm:w-4 sm:h-4 md:w-5 md:h-5 group-hover:translate-x-1 transition-transform"
-            />
-          </button>
+          
+          {/* Connect Wallet Button */}
+          <div className="flex flex-col items-center gap-4">
+            <WalletConnect />
+            
+            {/* Info text */}
+            <p className={`text-xs md:text-sm transition-colors duration-500 ${
+              darkMode ? 'text-slate-500' : 'text-slate-600'
+            }`}>
+              Connect your wallet to access the dashboard
+            </p>
+          </div>
         </div>
 
         {/* Enhanced Scroll Indicator */}
@@ -651,15 +697,14 @@ export default function LandingPage() {
             regulators who trust MedChain for medicine authentication.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <button className="px-8 py-4 bg-gradient-to-r from-cyan-500 to-emerald-500 rounded-full text-lg font-semibold shadow-lg hover:shadow-emerald-400/40 hover:scale-105 transition-all duration-300 text-white">
-              Start Free Trial
-            </button>
+            <WalletConnect />
             <button
+              onClick={() => scrollToSection("features")}
               className={`px-8 py-4 border-2 border-emerald-500 rounded-full text-lg font-semibold hover:bg-emerald-500 hover:text-white transition-all duration-300 ${
                 darkMode ? "text-emerald-400" : "text-emerald-600"
               }`}
             >
-              View Demo
+              Learn More
             </button>
           </div>
         </div>
