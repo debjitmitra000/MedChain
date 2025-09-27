@@ -1,5 +1,3 @@
-// src/main.jsx
-
 import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
 import { createBrowserRouter, RouterProvider, Navigate } from 'react-router-dom';
@@ -7,7 +5,7 @@ import { WagmiProvider, createConfig, http } from 'wagmi';
 import { mainnet, sepolia } from 'wagmi/chains';
 import { injected, metaMask, walletConnect, coinbaseWallet } from 'wagmi/connectors';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-
+import './style.css'
 // Import your custom hook and all pages
 import { useRole } from './hooks/useRole';
 import App from './App.jsx';
