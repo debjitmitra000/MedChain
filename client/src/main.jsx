@@ -1,13 +1,14 @@
+// Import React and necessary libraries
 import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
 import { createBrowserRouter, RouterProvider } from 'react-router-dom';
-import { WagmiProvider, createConfig, http } from 'wagmi';
-import { mainnet, sepolia } from 'wagmi/chains';
-import { injected, metaMask, walletConnect, coinbaseWallet } from 'wagmi/connectors';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import './style.css'
+import { WagmiProvider, createConfig, http } from 'wagmi';
+import { mainnet, sepolia } from 'viem/chains'; // Import chains from viem/chains
+import { injected, metaMask, walletConnect, coinbaseWallet } from 'wagmi/connectors';
+import './style.css';
 import { ThemeProvider } from './contexts/ThemeContext'
-// Import your pages
+import { GeoConnectProvider } from './contexts/GeoConnectContext.jsx';
 import App from './App.jsx';
 import LandingPage from './LandingPage.jsx'; // Add this import
 import ErrorBoundary from './components/ErrorBoundary.jsx';
@@ -24,6 +25,8 @@ import BatchDetail from './pages/BatchDetail.jsx';
 import RecallBatch from './pages/RecallBatch.jsx';
 import ExpiredReports from './pages/ExpiredReports.jsx';
 import AdminDashboard from './pages/AdminDashboard.jsx';
+import ProfileEdit from './pages/ProfileEdit.jsx';
+import HypergraphDemo from './pages/HypergraphDemo.jsx';
 
 // Wagmi and QueryClient setup
 const chainId = Number(import.meta.env.VITE_CHAIN_ID || 11155111);
@@ -67,6 +70,8 @@ const router = createBrowserRouter([
       { path: 'batch/:batchId/recall', element: <RecallBatch /> },
       { path: 'reports/expired', element: <ExpiredReports /> },
       { path: 'admin', element: <AdminDashboard /> },
+      { path: 'profile/edit', element: <ProfileEdit /> },
+      { path: 'hypergraph-demo', element: <HypergraphDemo /> },
     ],
   },
 ]);
@@ -77,9 +82,11 @@ createRoot(document.getElementById('root')).render(
     <ErrorBoundary>
       <WagmiProvider config={wagmiConfig}>
         <QueryClientProvider client={queryClient}>
-          <ThemeProvider>
-            <RouterProvider router={router} />
-          </ThemeProvider>
+          <GeoConnectProvider>
+            <ThemeProvider>
+              <RouterProvider router={router} />
+            </ThemeProvider>
+          </GeoConnectProvider>
         </QueryClientProvider>
       </WagmiProvider>
     </ErrorBoundary>

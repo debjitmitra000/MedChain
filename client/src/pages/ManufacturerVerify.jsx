@@ -37,20 +37,28 @@ export default function ManufacturerVerify() {
   const [err, setErr] = useState(null);
   const [status, setStatus] = useState('idle'); // 'idle', 'preparing', 'pending', 'confirming', 'success', 'error'
 
-  // Check admin status - PRESERVED EXACTLY
+  // Check admin status
   const { data: stats } = useQuery({
     queryKey: ['stats'],
     queryFn: getGlobalStats,
   });
 
-  // Load unverified manufacturers for easy selection - PRESERVED EXACTLY
+  // Load unverified manufacturers for easy selection
   const { data: unverifiedData } = useQuery({
     queryKey: ['unverified-manufacturers'],
     queryFn: getUnverifiedManufacturers,
   });
 
-  const isAdmin = address && stats?.stats?.adminAddress && 
-    address.toLowerCase() === stats.stats.adminAddress.toLowerCase();
+  // Extract admin address directly from API response
+  const adminAddress = stats?.stats?.adminAddress;
+  const isAdmin = address && adminAddress && 
+    address.toLowerCase() === adminAddress.toLowerCase();
+    
+  console.log('Admin check in ManufacturerVerify:', { 
+    userAddress: address, 
+    adminAddress: adminAddress,
+    isAdmin
+  });
 
   if (!isAdmin) {
     return (

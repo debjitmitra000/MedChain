@@ -3,6 +3,7 @@ const express = require('express');
 const router = express.Router();
 const blockchainService = require('../services/blockchain');
 const { ethers } = require('ethers');
+const { isAdmin, requireAdmin, getAdminAddresses } = require('../utils/adminAuth');
 
 // Utils
 const isValidEthereumAddress = (address) => {
@@ -217,7 +218,26 @@ router.post('/prepare-deactivate', async (req, res) => {
 router.post('/verify', async (req, res) => {
   try {
     console.log('🔍 Manufacturer verification request received');
-    const { manufacturerAddress } = req.body;
+    const { manufacturerAddress, adminAddress } = req.body;
+    
+    // Check admin authentication
+    if (!adminAddress) {
+      return res.status(400).json({ 
+        success: false, 
+        error: 'adminAddress is required for verification', 
+        code: 'MISSING_ADMIN_ADDRESS' 
+      });
+    }
+    
+    if (!isAdmin(adminAddress)) {
+      return res.status(403).json({ 
+        success: false, 
+        error: 'Unauthorized. Only admin can verify manufacturers.', 
+        code: 'UNAUTHORIZED_ADMIN',
+        configuredAdmins: getAdminAddresses().length
+      });
+    }
+    
     if (!manufacturerAddress) {
       return res.status(400).json({ success: false, error: 'manufacturerAddress is required' });
     }
@@ -255,7 +275,26 @@ router.post('/verify', async (req, res) => {
 router.post('/deactivate', async (req, res) => {
   try {
     console.log('⚠️ Manufacturer deactivation request received');
-    const { manufacturerAddress, reason } = req.body;
+    const { manufacturerAddress, reason, adminAddress } = req.body;
+    
+    // Check admin authentication
+    if (!adminAddress) {
+      return res.status(400).json({ 
+        success: false, 
+        error: 'adminAddress is required for deactivation', 
+        code: 'MISSING_ADMIN_ADDRESS' 
+      });
+    }
+    
+    if (!isAdmin(adminAddress)) {
+      return res.status(403).json({ 
+        success: false, 
+        error: 'Unauthorized. Only admin can deactivate manufacturers.', 
+        code: 'UNAUTHORIZED_ADMIN',
+        configuredAdmins: getAdminAddresses().length
+      });
+    }
+    
     if (!manufacturerAddress) {
       return res.status(400).json({
         success: false,
@@ -317,6 +356,31 @@ router.get('/:address/batches', async (req, res) => {
       return res.status(404).json({ success: false, error: 'Manufacturer not found', code: 'NOT_REGISTERED' });
     }
     res.status(500).json({ success: false, error: error.message, code: 'FETCH_BATCHES_FAILED' });
+  }
+});
+
+// Get admin configuration (for debugging/frontend use)
+router.get('/admin/config', async (req, res) => {
+  try {
+    const adminAddresses = getAdminAddresses();
+    const stats = await blockchainService.getContractStats();
+    
+    res.json({
+      success: true,
+      data: {
+        configuredAdmins: adminAddresses.length,
+        contractAdmin: stats.adminAddress,
+        environmentAdmins: adminAddresses,
+        lastUpdated: new Date().toISOString()
+      }
+    });
+  } catch (error) {
+    console.error('❌ Failed to get admin config:', error.message);
+    res.status(500).json({ 
+      success: false, 
+      error: error.message, 
+      code: 'ADMIN_CONFIG_FAILED' 
+    });
   }
 });
 

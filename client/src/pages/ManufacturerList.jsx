@@ -231,7 +231,7 @@ export default function ManufacturerList() {
                 ? 'bg-slate-700/60 border-slate-600 text-slate-300' 
                 : 'bg-white border-slate-200 text-slate-600'
             }`}>
-              Showing {manufacturers.length} of {pagination.total} manufacturers
+              Showing {manufacturers.length} of {pagination.total || 0} manufacturers
             </div>
           </div>
         </div>
