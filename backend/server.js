@@ -7,7 +7,7 @@ require('dotenv').config();
 function validateEnvironment() {
   const required = [
     'PORT', 'NETWORK', 'CHAIN_ID', 'PRIVATE_KEY',
-    'CONTRACT_ADDRESS', 'SEPOLIA_RPC_URL'
+    'CONTRACT_ADDRESS', 'RPC_URL'
   ];
 
   const missing = required.filter(env => !process.env[env]);
@@ -132,7 +132,7 @@ app.get('/health', async (req, res) => {
       network: {
         name: process.env.NETWORK,
         chainId: process.env.CHAIN_ID,
-        rpcUrl: process.env.SEPOLIA_RPC_URL ? 'Connected' : 'Not configured'
+        rpcUrl: process.env.RPC_URL ? 'Connected' : 'Not configured'
       },
       blockchain: {
         connected: true,
@@ -187,7 +187,7 @@ app.get('/api', (req, res) => {
     network: {
       name: process.env.NETWORK,
       chainId: process.env.CHAIN_ID,
-      explorer: process.env.NETWORK === 'sepolia' ? 'https://sepolia.etherscan.io' : 'https://etherscan.io'
+      explorer: process.env.NETWORK === 'filecoin' ? 'https://calibration.filfox.info' : 'https://sepolia.etherscan.io'
     },
     features: {
       blockchain: 'Ethereum/Sepolia',

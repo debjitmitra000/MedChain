@@ -9,6 +9,7 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as MedchainDashboardRouteImport } from './routes/medchain-dashboard'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as ExplorePublicKnowledgeRouteImport } from './routes/explore-public-knowledge'
 import { Route as AuthenticateSuccessRouteImport } from './routes/authenticate-success'
@@ -17,6 +18,11 @@ import { Route as ExplorePublicKnowledgeIndexRouteImport } from './routes/explor
 import { Route as PublicSpaceSpaceIdRouteImport } from './routes/public-space/$space-id'
 import { Route as PrivateSpaceSpaceIdRouteImport } from './routes/private-space/$space-id'
 
+const MedchainDashboardRoute = MedchainDashboardRouteImport.update({
+  id: '/medchain-dashboard',
+  path: '/medchain-dashboard',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const LoginRoute = LoginRouteImport.update({
   id: '/login',
   path: '/login',
@@ -59,6 +65,7 @@ export interface FileRoutesByFullPath {
   '/authenticate-success': typeof AuthenticateSuccessRoute
   '/explore-public-knowledge': typeof ExplorePublicKnowledgeRouteWithChildren
   '/login': typeof LoginRoute
+  '/medchain-dashboard': typeof MedchainDashboardRoute
   '/private-space/$space-id': typeof PrivateSpaceSpaceIdRoute
   '/public-space/$space-id': typeof PublicSpaceSpaceIdRoute
   '/explore-public-knowledge/': typeof ExplorePublicKnowledgeIndexRoute
@@ -67,6 +74,7 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/authenticate-success': typeof AuthenticateSuccessRoute
   '/login': typeof LoginRoute
+  '/medchain-dashboard': typeof MedchainDashboardRoute
   '/private-space/$space-id': typeof PrivateSpaceSpaceIdRoute
   '/public-space/$space-id': typeof PublicSpaceSpaceIdRoute
   '/explore-public-knowledge': typeof ExplorePublicKnowledgeIndexRoute
@@ -77,6 +85,7 @@ export interface FileRoutesById {
   '/authenticate-success': typeof AuthenticateSuccessRoute
   '/explore-public-knowledge': typeof ExplorePublicKnowledgeRouteWithChildren
   '/login': typeof LoginRoute
+  '/medchain-dashboard': typeof MedchainDashboardRoute
   '/private-space/$space-id': typeof PrivateSpaceSpaceIdRoute
   '/public-space/$space-id': typeof PublicSpaceSpaceIdRoute
   '/explore-public-knowledge/': typeof ExplorePublicKnowledgeIndexRoute
@@ -88,6 +97,7 @@ export interface FileRouteTypes {
     | '/authenticate-success'
     | '/explore-public-knowledge'
     | '/login'
+    | '/medchain-dashboard'
     | '/private-space/$space-id'
     | '/public-space/$space-id'
     | '/explore-public-knowledge/'
@@ -96,6 +106,7 @@ export interface FileRouteTypes {
     | '/'
     | '/authenticate-success'
     | '/login'
+    | '/medchain-dashboard'
     | '/private-space/$space-id'
     | '/public-space/$space-id'
     | '/explore-public-knowledge'
@@ -105,6 +116,7 @@ export interface FileRouteTypes {
     | '/authenticate-success'
     | '/explore-public-knowledge'
     | '/login'
+    | '/medchain-dashboard'
     | '/private-space/$space-id'
     | '/public-space/$space-id'
     | '/explore-public-knowledge/'
@@ -115,12 +127,20 @@ export interface RootRouteChildren {
   AuthenticateSuccessRoute: typeof AuthenticateSuccessRoute
   ExplorePublicKnowledgeRoute: typeof ExplorePublicKnowledgeRouteWithChildren
   LoginRoute: typeof LoginRoute
+  MedchainDashboardRoute: typeof MedchainDashboardRoute
   PrivateSpaceSpaceIdRoute: typeof PrivateSpaceSpaceIdRoute
   PublicSpaceSpaceIdRoute: typeof PublicSpaceSpaceIdRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/medchain-dashboard': {
+      id: '/medchain-dashboard'
+      path: '/medchain-dashboard'
+      fullPath: '/medchain-dashboard'
+      preLoaderRoute: typeof MedchainDashboardRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/login': {
       id: '/login'
       path: '/login'
@@ -192,6 +212,7 @@ const rootRouteChildren: RootRouteChildren = {
   AuthenticateSuccessRoute: AuthenticateSuccessRoute,
   ExplorePublicKnowledgeRoute: ExplorePublicKnowledgeRouteWithChildren,
   LoginRoute: LoginRoute,
+  MedchainDashboardRoute: MedchainDashboardRoute,
   PrivateSpaceSpaceIdRoute: PrivateSpaceSpaceIdRoute,
   PublicSpaceSpaceIdRoute: PublicSpaceSpaceIdRoute,
 }

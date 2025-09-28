@@ -3,7 +3,7 @@ const { ethers } = require('ethers');
 const fs = require('fs');
 const path = require('path');
 
-const requiredEnvs = ['NETWORK','CHAIN_ID','PRIVATE_KEY','CONTRACT_ADDRESS','SEPOLIA_RPC_URL'];
+const requiredEnvs = ['NETWORK','CHAIN_ID','PRIVATE_KEY','CONTRACT_ADDRESS','RPC_URL'];
 const missing = requiredEnvs.filter(k => !process.env[k]);
 if (missing.length > 0) {
   console.error('❌ Missing required environment variables:', missing);
@@ -20,7 +20,7 @@ function createProvider(rpcUrl) {
   p.getNetwork().catch(e => console.error('❌ Provider connection test failed:', e.message));
   return p;
 }
-const readProvider = createProvider(process.env.SEPOLIA_RPC_URL);
+const readProvider = createProvider(process.env.RPC_URL);
 const signerProvider = readProvider;
 
 // Default signer wallet (server-signer mode for dev/ops)

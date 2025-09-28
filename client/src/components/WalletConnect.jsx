@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { useAccount, useConnect, useDisconnect } from 'wagmi';
-import { useNavigate } from 'react-router-dom'; // Add this import
+import { useNavigate } from 'react-router-dom';
+import { useUserProfile } from '../hooks/useUserProfile';
+import { User } from 'lucide-react';
 
 // Wallet selection modal component
 const WalletSelectionModal = ({ isOpen, onClose, connectors, onSelectWallet, isPending, darkMode = true }) => {
@@ -137,9 +139,10 @@ export default function WalletConnect({ darkMode = true }) {
   const { address, isConnected } = useAccount();
   const { connect, connectors, isPending } = useConnect();
   const { disconnect } = useDisconnect();
-  const navigate = useNavigate(); // Add this hook
+  const navigate = useNavigate();
   const [showWalletModal, setShowWalletModal] = useState(false);
   const [availableConnectors, setAvailableConnectors] = useState([]);
+  const { displayName, profilePicture } = useUserProfile(isConnected ? address : null);
 
   // Detect available connectors - always call this hook
   useEffect(() => {
@@ -210,23 +213,65 @@ export default function WalletConnect({ darkMode = true }) {
   if (isConnected) {
     return (
       <div className="flex items-center gap-3">
-        <div className={`px-3 py-2 rounded-lg text-sm font-medium ${
-          darkMode
-            ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30'
-            : 'bg-emerald-50 text-emerald-600 border border-emerald-200'
-        }`}>
-          {address?.slice(0, 6)}...{address?.slice(-4)}
+        {/* Profile Picture */}
+        <div className="flex-shrink-0">
+          {profilePicture ? (
+            <img 
+              src={profilePicture} 
+              alt="Profile" 
+              className="w-10 h-10 rounded-full object-cover border-2 border-white dark:border-gray-600 shadow-sm" 
+            />
+          ) : (
+            <div className={`w-10 h-10 rounded-full flex items-center justify-center ${
+              darkMode ? 'bg-slate-600' : 'bg-gray-200'
+            }`}>
+              <User className={`w-6 h-6 ${
+                darkMode ? 'text-slate-400' : 'text-gray-500'
+              }`} />
+            </div>
+          )}
         </div>
-        <button
-          onClick={handleDisconnect}
-          className={`px-4 py-2 rounded-lg text-sm font-medium transition-all duration-300 hover:scale-105 ${
+
+        {/* User Info */}
+        <div className="flex flex-col">
+          <div className={`text-sm font-medium ${
+            darkMode ? 'text-white' : 'text-slate-900'
+          }`}>
+            {displayName}
+          </div>
+          <div className={`text-xs ${
             darkMode
-              ? 'bg-red-500/20 text-red-400 border border-red-500/30 hover:bg-red-500/30'
-              : 'bg-red-50 text-red-600 border border-red-200 hover:bg-red-100'
-          }`}
-        >
-          Disconnect
-        </button>
+              ? 'text-emerald-400'
+              : 'text-emerald-600'
+          }`}>
+            {address?.slice(0, 6)}...{address?.slice(-4)}
+          </div>
+        </div>
+
+        {/* Action Buttons */}
+        <div className="flex items-center gap-2">
+          <a
+            href="/profile/edit"
+            className={`px-3 py-2 rounded-lg text-sm font-medium transition-all duration-300 hover:scale-105 ${
+              darkMode
+                ? 'bg-blue-500/20 text-blue-400 border border-blue-500/30 hover:bg-blue-500/30'
+                : 'bg-blue-50 text-blue-600 border border-blue-200 hover:bg-blue-100'
+            }`}
+            style={{ textDecoration: 'none' }}
+          >
+            Edit Profile
+          </a>
+          <button
+            onClick={handleDisconnect}
+            className={`px-3 py-2 rounded-lg text-sm font-medium transition-all duration-300 hover:scale-105 ${
+              darkMode
+                ? 'bg-red-500/20 text-red-400 border border-red-500/30 hover:bg-red-500/30'
+                : 'bg-red-50 text-red-600 border border-red-200 hover:bg-red-100'
+            }`}
+          >
+            Disconnect
+          </button>
+        </div>
       </div>
     );
   }

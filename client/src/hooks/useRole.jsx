@@ -2,6 +2,7 @@ import { useAccount, useConnect } from 'wagmi'; // NEW: Added useConnect
 import { useQuery } from '@tanstack/react-query';
 import { getGlobalStats } from '../api/verify';
 import { getManufacturer } from '../api/manufacturer';
+import { isAdmin, getAdminAddresses } from '../utils/adminUtils';
 
 export function useRole() {
   const { address, isConnected, isConnecting } = useAccount(); // NEW: Added isConnecting for UI feedback
@@ -29,11 +30,8 @@ export function useRole() {
   const role = (() => {
     if (!isConnected) return 'guest';
 
-    if (
-      address &&
-      statsData?.stats?.adminAddress &&
-      address.toLowerCase() === statsData.stats.adminAddress.toLowerCase()
-    ) {
+    // Check if user is admin (either from env config or contract admin)
+    if (address && isAdmin(address, statsData?.stats?.adminAddress)) {
       return 'admin';
     }
 
@@ -109,6 +107,8 @@ export function useRole() {
     canRegisterBatch: role === 'manufacturer' && manufacturer?.isVerified && manufacturer?.isActive,
     canRegisterAsManufacturer: role === 'user' || (role === 'manufacturer' && !manufacturer?.wallet),
     adminAddress: statsData?.stats?.adminAddress,
+    configuredAdmins: getAdminAddresses(),
+    totalAdmins: getAdminAddresses().length + (statsData?.stats?.adminAddress ? 1 : 0),
     connectWallet, // NEW: Export the connect function
   };
 }
