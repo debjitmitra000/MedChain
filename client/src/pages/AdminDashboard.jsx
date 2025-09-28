@@ -11,6 +11,10 @@ import {
 import { getGlobalStats, getExpiredReports } from '../api/verify';
 import { getUnverifiedManufacturers } from '../api/manufacturer';
 import { useTheme } from '../contexts/ThemeContext';
+import { useRole } from '../hooks/useRole';
+import AdminStatus from '../components/AdminStatus';
+import { isAdmin as checkIsAdmin } from '../utils/adminUtils';
+import DebugAdmin from '../components/DebugAdmin';
 
 import {
   Shield,
@@ -41,7 +45,7 @@ export default function AdminDashboard() {
   const { darkMode } = useTheme();
   const [expandedCard, setExpandedCard] = useState(null);
   
-  // API-based data fetching (renamed to avoid conflicts)
+    // API-based data fetching - critical for admin address
   const { data: apiStatsData, isLoading: apiStatsLoading, error: apiStatsError } = useQuery({
     queryKey: ['stats'],
     queryFn: getGlobalStats,
@@ -63,19 +67,42 @@ export default function AdminDashboard() {
     staleTime: 30000,
   });
 
-  // Subgraph hooks (keeping original names)
-  const { data: statsData, loading: statsLoading, error: statsError } = useDashboardStats();
-  const { data: reportsData, loading: reportsLoading, error: reportsError } = useExpiredBatches();
+  // Subgraph hooks for dashboard data
+  const { data: subgraphStatsData, loading: statsLoading, error: statsError } = useDashboardStats();
+  const { data: subgraphReportsData, loading: reportsLoading, error: reportsError } = useExpiredBatches();
   const { data: verifiedData, loading: verifiedLoading, error: verifiedError } = useVerifiedManufacturers();
 
-  // Use subgraph data as primary source, fallback to API data
-  const stats = statsData || apiStatsData?.stats || {};
-  const reports = reportsData?.medicineBatches || apiReportsData?.data?.reports || [];
+  // The API is our source of truth for admin address
+  const adminAddress = apiStatsData?.stats?.adminAddress;
+  
+  // Merge stats data from both sources, with API data taking precedence
+  const stats = {
+    // Start with subgraph data
+    ...(subgraphStatsData || {}),
+    // Override/add with API data
+    ...(apiStatsData?.stats || {})
+  };
+  
+  // Other data sources
+  const reports = subgraphReportsData?.medicineBatches || apiReportsData?.data?.reports || [];
   const unverifiedManufacturers = unverifiedData?.data?.manufacturers || [];
   
-  // Check if user is admin
-  const isAdmin = address && stats?.adminAddress && 
-    address.toLowerCase() === stats.adminAddress.toLowerCase();
+  // Check if user is admin - using both environment config and contract admin
+  const configuredAdmins = import.meta.env.VITE_ADMIN_ADDRESSES?.split(',').map(a => a.trim().toLowerCase()) || [];
+  const isEnvAdmin = address && configuredAdmins.includes(address.toLowerCase());
+  const isContractAdmin = address && adminAddress && address.toLowerCase() === adminAddress.toLowerCase();
+  const isAdmin = isEnvAdmin || isContractAdmin;
+  
+  console.log('🔍 AdminDashboard Admin Check:', { 
+    userAddress: address, 
+    adminAddress, 
+    configuredAdmins,
+    isEnvAdmin,
+    isContractAdmin,
+    isAdmin,
+    envVar: import.meta.env.VITE_ADMIN_ADDRESSES,
+    apiStatsData: apiStatsData?.stats
+  });
 
   // Show loading state
   if (statsLoading || reportsLoading || verifiedLoading || apiStatsLoading || apiReportsLoading || unverifiedLoading) {
@@ -112,6 +139,7 @@ export default function AdminDashboard() {
       <div className={`min-h-screen font-sans transition-colors duration-500 ${
         darkMode ? 'bg-slate-950 text-white' : 'bg-white text-slate-900'
       }`}>
+        <DebugAdmin />
         <div className="flex items-center justify-center min-h-screen p-6">
           <div className={`max-w-lg w-full text-center p-12 rounded-3xl shadow-2xl ${
             darkMode 
@@ -352,6 +380,11 @@ export default function AdminDashboard() {
           </div>
         )}
 
+        {/* Admin Configuration */}
+        <div className="mb-16">
+          <AdminStatus />
+        </div>
+
         {/* System Statistics */}
         <div className="mb-16">
           <h2 className={`text-3xl font-bold mb-8 ${
@@ -536,7 +569,7 @@ export default function AdminDashboard() {
               <p className={`font-mono text-sm break-all ${
                 darkMode ? 'text-slate-300' : 'text-slate-600'
               }`}>
-                {stats.adminAddress || 'Unknown'}
+                {adminAddress || 'Unknown'}
               </p>
             </div>
           </div>
