@@ -25,7 +25,7 @@ export default function ManufacturerRegister() {
   const { darkMode } = useTheme();
   const { data: walletClient } = useWalletClient();
   const publicClient = usePublicClient();
-  const { address } = useAccount();
+  const { address, chain } = useAccount(); // Add chain info from wagmi
   const [form, setForm] = useState({ 
     manufacturerAddress: address || '', 
     name: '', 
@@ -52,7 +52,9 @@ export default function ManufacturerRegister() {
     setTx(null);
     
     try {
-      if (!walletClient) throw new Error('Connect wallet first');
+      if (!address) throw new Error('Wallet not connected');
+      if (!walletClient) throw new Error('Wallet client not available. Please ensure you are connected to Filecoin Calibration network in MetaMask.');
+      if (chain?.id !== 314159) throw new Error('Please switch your wallet to Filecoin Calibration testnet (Chain ID: 314159)');
       
       setStatus('preparing');
       
@@ -351,9 +353,9 @@ export default function ManufacturerRegister() {
                 <div className="pt-4">
                   <button 
                     onClick={submit} 
-                    disabled={isProcessing || !address}
+                    disabled={isProcessing || !address || !walletClient || chain?.id !== 314159}
                     className={`w-full px-8 py-6 rounded-2xl font-bold text-lg transition-all duration-300 hover:scale-105 flex items-center justify-center gap-4 ${
-                      (isProcessing || !address)
+                      (isProcessing || !address || !walletClient || chain?.id !== 314159)
                         ? (darkMode ? 'bg-slate-600 text-slate-400 cursor-not-allowed' : 'bg-slate-300 text-slate-500 cursor-not-allowed')
                         : (darkMode
                             ? 'bg-gradient-to-r from-emerald-500 to-emerald-600 text-white hover:from-emerald-600 hover:to-emerald-700 shadow-lg shadow-emerald-500/25'
@@ -364,12 +366,25 @@ export default function ManufacturerRegister() {
                     {isProcessing ? getStatusMessage() : 'Register as Manufacturer'}
                     {!isProcessing && <ArrowRight className="w-5 h-5" />}
                   </button>
-                  
                   {!address && (
                     <p className={`mt-4 text-center font-semibold ${
                       darkMode ? 'text-red-400' : 'text-red-600'
                     }`}>
                       Please connect your wallet first
+                    </p>
+                  )}
+                  {address && !walletClient && (
+                    <p className={`mt-4 text-center font-semibold ${
+                      darkMode ? 'text-red-400' : 'text-red-600'
+                    }`}>
+                      Wallet client not available. Please ensure you are using MetaMask and are connected to Filecoin Calibration (Chain ID: 314159).
+                    </p>
+                  )}
+                  {address && walletClient && chain?.id !== 314159 && (
+                    <p className={`mt-4 text-center font-semibold ${
+                      darkMode ? 'text-red-400' : 'text-red-600'
+                    }`}>
+                      Wrong network. Please switch your wallet to Filecoin Calibration (Chain ID: 314159).
                     </p>
                   )}
                 </div>

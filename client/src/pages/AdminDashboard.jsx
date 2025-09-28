@@ -41,6 +41,7 @@ import {
 
 export default function AdminDashboard() {
   const { address } = useAccount();
+  const { isAdmin: roleIsAdmin } = useRole(); // Use the role hook which is working
   
   const { darkMode } = useTheme();
   const [expandedCard, setExpandedCard] = useState(null);
@@ -67,19 +68,30 @@ export default function AdminDashboard() {
     staleTime: 30000,
   });
 
+  // Fallback data when APIs fail
+  const fallbackStats = {
+    totalBatches: 0,
+    totalManufacturers: 0,
+    totalRecalledBatches: 0,
+    totalExpiredScans: 0,
+    adminAddress: '0x84567F4604B194DaBc502F66497D57d745752A27' // Fallback admin
+  };
+
   // Subgraph hooks for dashboard data
   const { data: subgraphStatsData, loading: statsLoading, error: statsError } = useDashboardStats();
   const { data: subgraphReportsData, loading: reportsLoading, error: reportsError } = useExpiredBatches();
   const { data: verifiedData, loading: verifiedLoading, error: verifiedError } = useVerifiedManufacturers();
 
-  // The API is our source of truth for admin address
-  const adminAddress = apiStatsData?.stats?.adminAddress;
+  // The API is our source of truth for admin address, with fallback
+  const adminAddress = apiStatsData?.stats?.adminAddress || fallbackStats.adminAddress;
   
-  // Merge stats data from both sources, with API data taking precedence
+  // Merge stats data from all sources, with fallback as base
   const stats = {
-    // Start with subgraph data
+    // Start with fallback data
+    ...fallbackStats,
+    // Add subgraph data if available
     ...(subgraphStatsData || {}),
-    // Override/add with API data
+    // Override/add with API data if available
     ...(apiStatsData?.stats || {})
   };
   
@@ -99,13 +111,17 @@ export default function AdminDashboard() {
     configuredAdmins,
     isEnvAdmin,
     isContractAdmin,
-    isAdmin,
+    localIsAdmin: isAdmin,
+    roleIsAdmin,
     envVar: import.meta.env.VITE_ADMIN_ADDRESSES,
     apiStatsData: apiStatsData?.stats
   });
 
-  // Show loading state
-  if (statsLoading || reportsLoading || verifiedLoading || apiStatsLoading || apiReportsLoading || unverifiedLoading) {
+  // Show loading state (with timeout to prevent infinite loading)
+  const hasErrors = apiStatsError || apiReportsError || unverifiedError || statsError || reportsError || verifiedError;
+  const isStillLoading = (statsLoading || reportsLoading || verifiedLoading || apiStatsLoading || apiReportsLoading || unverifiedLoading) && !hasErrors;
+
+  if (isStillLoading) {
     return (
       <div className={`min-h-screen font-sans transition-colors duration-500 ${
         darkMode ? 'bg-slate-950 text-white' : 'bg-white text-slate-900'
@@ -126,15 +142,18 @@ export default function AdminDashboard() {
     );
   }
 
-  // Show API error if backend is not available
+  // Handle API errors gracefully - show dashboard with available data
   const hasApiError = apiStatsError || apiReportsError || unverifiedError;
+  const hasBlockchainError = statsError || reportsError || verifiedError;
   const isBackendUnavailable = hasApiError && (
     apiStatsError?.message?.includes('ECONNREFUSED') ||
     apiReportsError?.message?.includes('ECONNREFUSED') ||
     unverifiedError?.message?.includes('ECONNREFUSED')
   );
 
-  if (!isAdmin) {
+
+
+  if (!roleIsAdmin) {
     return (
       <div className={`min-h-screen font-sans transition-colors duration-500 ${
         darkMode ? 'bg-slate-950 text-white' : 'bg-white text-slate-900'
@@ -232,6 +251,35 @@ export default function AdminDashboard() {
                 }`}>
                   npm run backend
                 </code>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Blockchain Error Alert */}
+        {hasBlockchainError && !isBackendUnavailable && (
+          <div className={`mb-8 p-6 rounded-2xl border ${
+            darkMode 
+              ? 'bg-amber-500/10 border-amber-500/30' 
+              : 'bg-amber-50 border-amber-200'
+          }`}>
+            <div className="flex items-start gap-4">
+              <AlertTriangle className="w-6 h-6 text-amber-500 flex-shrink-0 mt-0.5" />
+              <div>
+                <h3 className={`font-bold text-lg mb-2 ${
+                  darkMode ? 'text-amber-400' : 'text-amber-600'
+                }`}>
+                  Blockchain Connection Issues
+                </h3>
+                <p className={`mb-4 ${darkMode ? 'text-amber-200' : 'text-amber-700'}`}>
+                  Some blockchain data may be unavailable due to RPC limits or contract issues. 
+                  Showing available data with fallbacks.
+                </p>
+                <div className="text-sm opacity-75">
+                  <p>• Check Alchemy API limits</p>
+                  <p>• Verify contract deployment on Sepolia</p>
+                  <p>• Some features may have limited data</p>
+                </div>
               </div>
             </div>
           </div>
