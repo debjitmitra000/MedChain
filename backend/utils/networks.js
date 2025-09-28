@@ -1,5 +1,5 @@
-// utils/networks.js
-export const NETWORKS = {
+// utils/networks.js (CommonJS)
+const NETWORKS = {
   filecoin: {
     chainId: 314159,
     name: 'Filecoin Calibration Testnet',
@@ -11,54 +11,47 @@ export const NETWORKS = {
   sepolia: {
     chainId: 11155111,
     name: 'Sepolia Testnet',
-    rpcUrl: process.env.SEPOLIA_RPC_URL,
+    rpcUrl: process.env.SEPOLIA_RPC_URL || null,
     explorerUrl: 'https://sepolia.etherscan.io',
-    currency: 'SepoliaETH',
+    currency: 'ETH',
     type: 'ethereum'
   }
 };
 
-export const DEFAULT_NETWORK = process.env.NETWORK || 'filecoin';
+const DEFAULT_NETWORK = process.env.NETWORK || 'filecoin';
 
-export function getNetworkConfig(network = DEFAULT_NETWORK) {
+function getNetworkConfig(network = DEFAULT_NETWORK) {
   return NETWORKS[network] || NETWORKS.filecoin;
 }
 
-export function getNetworkByChainId(chainId) {
+function getNetworkByChainId(chainId) {
   return Object.values(NETWORKS).find(network => network.chainId === chainId);
 }
 
-export function isFilecoinNetwork(network = DEFAULT_NETWORK) {
-  return NETWORKS[network]?.type === 'filecoin';
+function isFilecoinNetwork(network = DEFAULT_NETWORK) {
+  return NETWORKS[network] && NETWORKS[network].type === 'filecoin';
 }
 
-export function getExplorerUrl(network = DEFAULT_NETWORK, txHash = null, address = null) {
+function getExplorerUrl(network = DEFAULT_NETWORK, txHash = null, address = null) {
   const config = getNetworkConfig(network);
   const baseUrl = config.explorerUrl;
-  
-  if (txHash) {
-    return `${baseUrl}/tx/${txHash}`;
-  }
-  if (address) {
-    return `${baseUrl}/address/${address}`;
-  }
+  if (txHash) return `${baseUrl}/tx/${txHash}`;
+  if (address) return `${baseUrl}/address/${address}`;
   return baseUrl;
 }
 
-export function formatChainId(chainId) {
+function formatChainId(chainId) {
   return `0x${chainId.toString(16)}`;
 }
 
 // Network switching for MetaMask
-export async function switchToNetwork(chainId) {
-  if (!window.ethereum) {
+async function switchToNetwork(chainId) {
+  if (typeof window === 'undefined' || !window.ethereum) {
     throw new Error('MetaMask not found');
   }
 
   const network = getNetworkByChainId(chainId);
-  if (!network) {
-    throw new Error(`Unsupported chain ID: ${chainId}`);
-  }
+  if (!network) throw new Error(`Unsupported chain ID: ${chainId}`);
 
   try {
     await window.ethereum.request({
@@ -66,8 +59,7 @@ export async function switchToNetwork(chainId) {
       params: [{ chainId: formatChainId(chainId) }],
     });
   } catch (switchError) {
-    // This error code indicates that the chain has not been added to MetaMask
-    if (switchError.code === 4902) {
+    if (switchError && switchError.code === 4902) {
       await addNetworkToMetaMask(network);
     } else {
       throw switchError;
@@ -76,8 +68,8 @@ export async function switchToNetwork(chainId) {
 }
 
 // Add network to MetaMask
-export async function addNetworkToMetaMask(network) {
-  if (!window.ethereum) {
+async function addNetworkToMetaMask(network) {
+  if (typeof window === 'undefined' || !window.ethereum) {
     throw new Error('MetaMask not found');
   }
 
@@ -98,4 +90,16 @@ export async function addNetworkToMetaMask(network) {
     ],
   });
 }
+
+module.exports = {
+  NETWORKS,
+  DEFAULT_NETWORK,
+  getNetworkConfig,
+  getNetworkByChainId,
+  isFilecoinNetwork,
+  getExplorerUrl,
+  formatChainId,
+  switchToNetwork,
+  addNetworkToMetaMask
+};
 
