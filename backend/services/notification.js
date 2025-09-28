@@ -1,6 +1,7 @@
 // backend/services/notification.js
 const nodemailer = require('nodemailer');
 const moment = require('moment'); // optional: consider dayjs for a lighter dep
+const { getAdminEmails, getPrimaryAdminEmail } = require('../utils/adminAuth');
 
 class NotificationService {
   constructor() {
@@ -93,7 +94,7 @@ class NotificationService {
         await this.transporter.sendMail({
           from: `"MedChain Alert System" <${process.env.EMAIL_USER}>`,
           to: manufacturerEmail,
-          cc: process.env.ADMIN_EMAIL || undefined,
+          cc: getAdminEmails().join(',') || undefined,
           subject,
           html: htmlContent
         });
@@ -163,7 +164,8 @@ class NotificationService {
       if (this.emailEnabled) {
         await this.transporter.sendMail({
           from: `"MedChain Security Alert" <${process.env.EMAIL_USER}>`,
-          to: process.env.ADMIN_EMAIL,
+          to: getPrimaryAdminEmail(),
+          cc: getAdminEmails().slice(1).join(','), // CC other admins
           subject,
           html: htmlContent,
           priority: 'high'

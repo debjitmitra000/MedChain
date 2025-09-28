@@ -106,6 +106,7 @@ export default function App() {
         { to: "/admin", icon: Settings, label: "Admin Dashboard" },
         { to: "/verify", icon: Search, label: "Verify" },
         { to: "/manufacturer/list", icon: Factory, label: "Manufacturers" },
+        { to: "/hypergraph-demo", icon: BarChart3, label: "Hypergraph Demo" },
       );
     } else if (isManufacturer) {
       items.push(
