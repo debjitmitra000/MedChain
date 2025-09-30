@@ -20,6 +20,7 @@ import {
   ArrowRight,
   ExternalLink,
 } from 'lucide-react';
+import { addNetworkToMetaMask, switchToNetwork } from '../utils/networks';
 
 export default function ManufacturerRegister() {
   const { darkMode } = useTheme();
@@ -59,8 +60,29 @@ export default function ManufacturerRegister() {
       setStatus('preparing');
       
       const prep = await prepareRegisterManufacturer(form);
-      const { contractAddress, abi, method, args } = prep.transaction;
+      const { contractAddress, abi, method } = prep.transaction;
+      let { args } = prep.transaction;
+
+      // Ensure the first argument matches the connected wallet (self-registration requirement)
+      if (Array.isArray(args)) {
+        args = [...args];
+        args[0] = address;
+      }
       
+      // Preflight: simulate the transaction to catch revert reasons early
+      try {
+        await publicClient.simulateContract({
+          account: address,
+          address: contractAddress,
+          abi,
+          functionName: method,
+          args,
+        });
+      } catch (simErr) {
+        const msg = parseBlockchainError(simErr);
+        throw new Error(msg || 'Transaction simulation failed. Please check your inputs.');
+      }
+
       setStatus('pending');
       
       const hash = await walletClient.writeContract({
@@ -68,6 +90,7 @@ export default function ManufacturerRegister() {
         abi,
         functionName: method,
         args,
+        account: address,
       });
       
       console.log('Transaction submitted:', hash);
@@ -93,9 +116,44 @@ export default function ManufacturerRegister() {
       
     } catch (e) {
       console.error('Transaction error:', e);
-      setErr(e?.message || String(e));
+      setErr(parseBlockchainError(e));
       setStatus('error');
     }
+  }
+
+  function parseBlockchainError(error) {
+    const fallback = error?.message || String(error) || 'Unknown error';
+    const msg = typeof error === 'string' ? error : (error?.shortMessage || error?.message || '');
+    if (!msg) return fallback;
+    // Common revert reasons mapping
+    if (msg.includes('Can only register yourself') || msg.toLowerCase().includes('register yourself')) {
+      return 'Registration must be initiated by the same wallet as the manufacturer address. We auto-corrected this, please try again.';
+    }
+    if (msg.toLowerCase().includes('already registered')) {
+      return 'Manufacturer already registered. If you need verification, contact an admin.';
+    }
+    if (msg.toLowerCase().includes('invalid email')) {
+      return 'Invalid email format. Please use a valid email like name@domain.tld';
+    }
+    if (msg.toLowerCase().includes('missing required fields')) {
+      return 'Missing required fields. Please fill in name, license, and email.';
+    }
+    if (msg.toLowerCase().includes('insufficient funds')) {
+      return 'Insufficient funds to pay gas on Filecoin Calibration. Please add some tFIL to your wallet.';
+    }
+    if (msg.toLowerCase().includes('user rejected')) {
+      return 'You rejected the transaction in your wallet.';
+    }
+    if (msg.toLowerCase().includes('intrinsic gas') || msg.toLowerCase().includes('out of gas')) {
+      return 'Transaction ran out of gas. Try again; if it persists, contact support.';
+    }
+    if (msg.toLowerCase().includes('json-rpc') || msg.toLowerCase().includes('internal')) {
+      return 'Internal RPC error from the node. This often indicates a contract revert (e.g., failing require). Please double-check your inputs and try again.';
+    }
+    // Extract revert reason if present
+    const match = msg.match(/revert(?:ed)?(?: with reason string)?[:\s]*["']?([^"']+)["']?/i);
+    if (match && match[1]) return match[1];
+    return fallback;
   }
 
   const getStatusMessage = () => {
@@ -379,6 +437,31 @@ export default function ManufacturerRegister() {
                     }`}>
                       Wallet client not available. Please ensure you are using MetaMask and are connected to Filecoin Calibration (Chain ID: 314159).
                     </p>
+                  )}
+                  {address && (!walletClient || chain?.id !== 314159) && (
+                    <div className="mt-4 text-center">
+                      <button
+                        onClick={async () => {
+                          try {
+                            await addNetworkToMetaMask({
+                              chainId: 314159,
+                              name: 'Filecoin Calibration Testnet',
+                              rpcUrl: import.meta.env.VITE_FILECOIN_RPC_URL || 'https://api.calibration.node.glif.io/rpc/v1',
+                              explorerUrl: import.meta.env.VITE_FILECOIN_EXPLORER_URL || 'https://calibration.filfox.info',
+                              currency: 'tFIL'
+                            });
+                            // Attempt to switch after adding
+                            await switchToNetwork(314159);
+                          } catch (e) {
+                            console.error('Network add/switch failed:', e);
+                            alert('Failed to add/switch network in MetaMask. Please add Filecoin Calibration manually.');
+                          }
+                        }}
+                        className="px-4 py-2 rounded-lg bg-amber-500 text-white font-semibold"
+                      >
+                        Add / Switch to Filecoin Calibration
+                      </button>
+                    </div>
                   )}
                   {address && walletClient && chain?.id !== 314159 && (
                     <p className={`mt-4 text-center font-semibold ${

@@ -2,7 +2,8 @@ import React, { useState, useEffect } from "react";
 import { Outlet, Link, NavLink, useLocation } from "react-router-dom";
 import { useRole } from "./hooks/useRole";
 import { useTheme } from "./contexts/ThemeContext";
-import WalletConnect from "./components/WalletConnect.jsx";
+import WalletConnect from './components/WalletConnect.jsx';
+import SubgraphStatusIndicator from './components/SubgraphStatusIndicator.jsx';
 import {
   Shield,
   User,
@@ -23,6 +24,7 @@ import {
   ChevronDown,
   Wallet,
   LogOut,
+  Database,
 } from "lucide-react";
 import ErrorBoundary from "./components/ErrorBoundary.jsx";
 import { ToastProvider } from "./components/Toast.jsx";
@@ -103,35 +105,36 @@ export default function App() {
 
     if (isAdmin) {
       items.push(
-        { to: "/admin", icon: Settings, label: "Admin Dashboard" },
-        { to: "/verify", icon: Search, label: "Verify" },
-        { to: "/manufacturer/list", icon: Factory, label: "Manufacturers" },
-        { to: "/hypergraph-demo", icon: BarChart3, label: "Hypergraph Demo" },
+        { to: "/app/admin", icon: Settings, label: "Admin Dashboard" },
+        { to: "/app/verify", icon: Search, label: "Verify" },
+        { to: "/app/manufacturer/list", icon: Factory, label: "Manufacturers" },
+        { to: "/app/hypergraph-demo", icon: BarChart3, label: "Hypergraph Demo" },
+        { to: "/app/subgraph-demo", icon: Database, label: "Subgraph Demo" },
       );
     } else if (isManufacturer) {
       items.push(
-        { to: "/manufacturer/me", icon: User, label: "My Profile", end: true },
-        { to: "/verify", icon: Search, label: "Verify" },
-        { to: "/manufacturer/me/batches", icon: Package, label: "My Batches" },
+        { to: "/app/manufacturer/me", icon: User, label: "My Profile", end: true },
+        { to: "/app/verify", icon: Search, label: "Verify" },
+        { to: "/app/manufacturer/me/batches", icon: Package, label: "My Batches" },
       );
 
       if (canRegisterBatch) {
         items.splice(3, 0, {
-          to: "/batch/register",
+          to: "/app/batch/register",
           icon: UserPlus,
           label: "Register Batch",
         });
       }
     } else {
       items.push(
-        { to: "/home", icon: Home, label: "User Dashboard" },
-        { to: "/verify", icon: Search, label: "Verify" },
-        { to: "/manufacturer/list", icon: Factory, label: "Manufacturers" }
+        { to: "/app/home", icon: Home, label: "User Dashboard" },
+        { to: "/app/verify", icon: Search, label: "Verify" },
+        { to: "/app/manufacturer/list", icon: Factory, label: "Manufacturers" }
       );
 
       if (canRegisterAsManufacturer && isConnected) {
         items.push({
-          to: "/manufacturer/register",
+          to: "/app/manufacturer/register",
           icon: UserPlus,
           label: "Register as Manufacturer",
         });
@@ -239,7 +242,7 @@ export default function App() {
               <div className="flex items-center justify-between h-20">
                 {/* Logo Section */}
                 <Link
-                  to="/"
+                  to="/app/home"
                   className={`flex items-center gap-3 text-2xl font-bold transition-all duration-300 hover:scale-105 ${
                     darkMode ? "text-white" : "text-slate-900"
                   }`}
@@ -256,6 +259,9 @@ export default function App() {
 
                 {/* Right Side Actions */}
                 <div className="flex items-center gap-4">
+                  {/* Subgraph Status Indicator */}
+                  <SubgraphStatusIndicator />
+                  
                   {/* Theme Toggle */}
                   <button
                     onClick={toggleTheme}

@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { useAccount, useConnect } from 'wagmi'; // NEW: Added useConnect
 import { useQuery } from '@tanstack/react-query';
 import { getGlobalStats } from '../api/verify';
@@ -7,6 +8,7 @@ import { isAdmin, getAdminAddresses } from '../utils/adminUtils';
 export function useRole() {
   const { address, isConnected, isConnecting } = useAccount(); // NEW: Added isConnecting for UI feedback
   const { connect, connectors } = useConnect(); // NEW: This hook provides the tools to connect
+  const [manufacturerFetchDisabled, setManufacturerFetchDisabled] = useState(false);
 
   // Get global stats to check admin address
   const { data: statsData } = useQuery({
@@ -21,9 +23,23 @@ export function useRole() {
   const { data: manufacturerData } = useQuery({
     queryKey: ['manufacturer', address],
     queryFn: () => getManufacturer(address),
-    enabled: isConnected && !!address,
+    enabled: isConnected && !!address && !manufacturerFetchDisabled,
     retry: false, // Don't retry if manufacturer not found
     staleTime: 30000, // Cache for 30 seconds
+    onError: (err) => {
+      try {
+        const code = err?.response?.data?.code || err?.code || null;
+        if (code === 'NOT_REGISTERED' || code === 'NOT_REGISTERED_CACHED') {
+          // Temporarily disable fetching for this address to avoid repeated calls
+          setManufacturerFetchDisabled(true);
+          // Re-enable after a short TTL (match server default or env)
+          const ttl = Number(import.meta.env.VITE_NOT_REGISTERED_TTL_MS || 60000);
+          setTimeout(() => setManufacturerFetchDisabled(false), ttl);
+        }
+      } catch (e) {
+        // ignore
+      }
+    }
   });
 
   // Determine role

@@ -1,12 +1,30 @@
 // Import React and necessary libraries
 import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
-import { createBrowserRouter, RouterProvider } from 'react-router-dom';
+import { createBrowserRouter, RouterProvider, Navigate } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { WagmiProvider, createConfig, http } from 'wagmi';
+import { WagmiProvider, createConfig } from 'wagmi';
+import { http } from 'viem';
 import { mainnet, sepolia } from 'viem/chains'; // Import chains from viem/chains
+
+// Import styles at the top level
+import './index.css';
+
+// Filecoin Calibration chain definition (viem-compatible shape)
+const filecoinCalibration = {
+  id: 314159,
+  name: 'Filecoin Calibration Testnet',
+  network: 'filecoin-calibration',
+  nativeCurrency: { name: 'tFIL', symbol: 'tFIL', decimals: 18 },
+  rpcUrls: {
+    default: { http: [import.meta.env.VITE_FILECOIN_RPC_URL || 'https://api.calibration.node.glif.io/rpc/v1'] },
+    public: { http: [import.meta.env.VITE_FILECOIN_RPC_URL || 'https://api.calibration.node.glif.io/rpc/v1'] }
+  },
+  blockExplorers: {
+    default: { name: 'Filfox Calibration', url: import.meta.env.VITE_FILECOIN_EXPLORER_URL || 'https://calibration.filfox.info' }
+  }
+};
 import { injected, metaMask, walletConnect, coinbaseWallet } from 'wagmi/connectors';
-import './style.css';
 import { ThemeProvider } from './contexts/ThemeContext'
 import { GeoConnectProvider } from './contexts/GeoConnectContext.jsx';
 import App from './App.jsx';
@@ -27,10 +45,17 @@ import ExpiredReports from './pages/ExpiredReports.jsx';
 import AdminDashboard from './pages/AdminDashboard.jsx';
 import ProfileEdit from './pages/ProfileEdit.jsx';
 import HypergraphDemo from './pages/HypergraphDemo.jsx';
+import SubgraphDemo from './pages/SubgraphDemo.jsx';
 
 // Wagmi and QueryClient setup
-const chainId = Number(import.meta.env.VITE_CHAIN_ID || 11155111);
-const chains = chainId === sepolia.id ? [sepolia] : [mainnet];
+const chainId = Number(import.meta.env.VITE_CHAIN_ID || 314159);
+let chains;
+if (chainId === sepolia.id) chains = [sepolia];
+else if (chainId === mainnet.id) chains = [mainnet];
+else if (chainId === filecoinCalibration.id) chains = [filecoinCalibration];
+else chains = [filecoinCalibration];
+
+// Wagmi v2 configuration with proper parameters
 const wagmiConfig = createConfig({
   chains,
   connectors: [
@@ -40,25 +65,31 @@ const wagmiConfig = createConfig({
     coinbaseWallet({ appName: 'MedChain' })
   ],
   transports: {
+    [filecoinCalibration.id]: http(import.meta.env.VITE_FILECOIN_RPC_URL || 'https://api.calibration.node.glif.io/rpc/v1'),
     [sepolia.id]: http(),
     [mainnet.id]: http(),
-  },
+  }
 });
 const queryClient = new QueryClient();
 
-// Updated router - separate landing page from app routes
+// Completely restructured router configuration
 const router = createBrowserRouter([
+  // The landing page route at the root level
   {
     path: '/',
-    element: <LandingPage />, // Landing page as separate route
+    element: <LandingPage />,
+    index: true,
   },
+  // App routes under /app prefix
   {
-    path: '/',
+    path: '/app',
     element: <App />,
     children: [
-      { path: 'home', element: <Home /> }, // Dashboard home
-      { path: 'dashboard', element: <Verify /> }, // Main dashboard - defaults to verify page
-      { path: 'verify/:batchId?', element: <Verify /> },
+      { path: '', element: <Home /> }, // Default route when accessing /app
+      { path: 'home', element: <Home /> }, 
+      { path: 'dashboard', element: <Verify /> }, 
+      { path: 'verify', element: <Verify /> },
+      { path: 'verify/:batchId', element: <Verify /> },
       { path: 'manufacturer/register', element: <ManufacturerRegister /> },
       { path: 'manufacturer/list', element: <ManufacturerList /> },
       { path: 'manufacturer/verify', element: <ManufacturerVerify /> },
@@ -72,9 +103,27 @@ const router = createBrowserRouter([
       { path: 'admin', element: <AdminDashboard /> },
       { path: 'profile/edit', element: <ProfileEdit /> },
       { path: 'hypergraph-demo', element: <HypergraphDemo /> },
+      { path: 'subgraph-demo', element: <SubgraphDemo /> },
     ],
   },
+  // Redirect legacy routes
+  {
+    path: '/home',
+    element: <Navigate to="/app/home" replace />,
+  },
+  {
+    path: '/verify',
+    element: <Navigate to="/app/verify" replace />,
+  },
+  {
+    path: '/admin',
+    element: <Navigate to="/app/admin" replace />,
+  },
 ]);
+
+// Debug logs
+console.log('Initializing app');
+console.log('Router config:', router);
 
 // Render the app
 createRoot(document.getElementById('root')).render(

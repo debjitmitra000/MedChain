@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useAccount, useConnect, useDisconnect } from 'wagmi';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import { useUserProfile } from '../hooks/useUserProfile';
 import { User } from 'lucide-react';
 
@@ -250,8 +250,8 @@ export default function WalletConnect({ darkMode = true }) {
 
         {/* Action Buttons */}
         <div className="flex items-center gap-2">
-          <a
-            href="/profile/edit"
+          <Link
+            to="/app/profile/edit"
             className={`px-3 py-2 rounded-lg text-sm font-medium transition-all duration-300 hover:scale-105 ${
               darkMode
                 ? 'bg-blue-500/20 text-blue-400 border border-blue-500/30 hover:bg-blue-500/30'
@@ -260,7 +260,7 @@ export default function WalletConnect({ darkMode = true }) {
             style={{ textDecoration: 'none' }}
           >
             Edit Profile
-          </a>
+          </Link>
           <button
             onClick={handleDisconnect}
             className={`px-3 py-2 rounded-lg text-sm font-medium transition-all duration-300 hover:scale-105 ${

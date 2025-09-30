@@ -15,14 +15,14 @@
 
 ### 2. Network Utilities
 - **Backend**: Created `/backend/utils/networks.js` with:
-  - Multi-network configuration (Sepolia + Filecoin Calibration)
+  - Multi-network configuration (Filecoin Calibration primary; Sepolia deprecated in docs)
   - Network switching utilities
   - Explorer URL generation
   - Chain ID formatting
 
 - **Client**: Created `/client/src/utils/networks.js` with:
-  - MetaMask network switching
-  - Multi-network support
+  - MetaMask network switching helpers for Filecoin Calibration
+  - Filecoin Calibration set as default chain
   - Network detection by chain ID
 
 ### 3. Network Connectivity Testing
@@ -31,11 +31,7 @@
   - ❌ **Sepolia**: Failed (RPC URL not configured in environment)
 
 ### 4. User Interface Components
-- **NetworkSelector**: Created `/client/src/components/NetworkSelector.jsx`
-  - Real-time network detection
-  - MetaMask network switching
-  - Visual network status indicators
-  - Integrated into Admin Dashboard
+Note: A NetworkSelector component was developed during integration but was later removed from the UI by request. Filecoin Calibration is now the default network across the client.
 
 ### 5. Admin Dashboard Integration
 - Added NetworkSelector to admin control center
@@ -47,14 +43,12 @@
 | Network | Status | Chain ID | RPC Connectivity |
 |---------|--------|----------|------------------|
 | **Filecoin Calibration** | ✅ Ready | 314159 | ✅ Connected |
-| **Sepolia Testnet** | ⚠️ Partial | 11155111 | ❌ RPC URL needed |
 
 ## 🔧 Next Steps
 
 ### Immediate Actions
-1. **Configure Sepolia RPC URL** in environment variables
-2. **Test MetaMask integration** with both networks
-3. **Update blockchain service** to support multi-network operations
+1. **Test MetaMask integration** with Filecoin Calibration (add chain to wallet if necessary)
+2. **Update blockchain service** to ensure consistent currency labeling and explorer links (done)
 
 ### Future Enhancements
 1. **Smart Contract Deployment** on Filecoin Calibration

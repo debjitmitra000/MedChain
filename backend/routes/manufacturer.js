@@ -23,6 +23,36 @@ const logRequest = (req, _res, next) => {
 };
 router.use(logRequest);
 
+// Simple in-memory cache for addresses known to be NOT_REGISTERED to avoid
+// repeatedly calling the blockchain for addresses that don't exist yet.
+// Key: normalized address, Value: timestamp (ms) when the entry expires
+const NOT_REGISTERED_CACHE = new Map();
+const NOT_REGISTERED_TTL_MS = parseInt(process.env.NOT_REGISTERED_TTL_MS || '60000', 10); // default 60s
+
+function isAddressNotRegisteredCached(address) {
+  try {
+    const key = address.toLowerCase();
+    const expires = NOT_REGISTERED_CACHE.get(key);
+    if (!expires) return false;
+    if (Date.now() > expires) {
+      NOT_REGISTERED_CACHE.delete(key);
+      return false;
+    }
+    return true;
+  } catch (e) {
+    return false;
+  }
+}
+
+function cacheAddressAsNotRegistered(address) {
+  try {
+    const key = address.toLowerCase();
+    NOT_REGISTERED_CACHE.set(key, Date.now() + NOT_REGISTERED_TTL_MS);
+  } catch (e) {
+    // ignore cache failures
+  }
+}
+
 // Guidance for GET /register (method guard) - Updated to show email requirement
 router.get('/register', (_req, res) => {
   res.status(405).json({
@@ -347,11 +377,20 @@ router.get('/:address/batches', async (req, res) => {
       return res.status(400).json({ success: false, error: 'Invalid Ethereum address format', received: address });
     }
     const normalizedAddress = normalizeAddress(address);
+    if (isAddressNotRegisteredCached(normalizedAddress)) {
+      console.log(`⏱️ Cached: Address ${normalizedAddress} recently marked as NOT_REGISTERED, returning 404`);
+      return res.status(404).json({ success: false, error: 'Manufacturer not found (cached)', code: 'NOT_REGISTERED_CACHED', address: normalizedAddress });
+    }
     const batches = await blockchainService.getManufacturerBatches(normalizedAddress);
     console.log(`✅ Found ${batches.length} batches for manufacturer`);
     res.json({ success: true, data: { manufacturerAddress: normalizedAddress, totalBatches: batches.length, batches } });
   } catch (error) {
     console.error('❌ Failed to get manufacturer batches:', error.message);
+    if (error.message && error.message.includes('Manufacturer not registered')) {
+      // Cache the negative result so we don't hammer the chain
+      try { cacheAddressAsNotRegistered(normalizeAddress(req.params.address)); } catch (e) {}
+      return res.status(404).json({ success: false, error: 'Manufacturer not found', code: 'NOT_REGISTERED' });
+    }
     if (error.message.includes('Manufacturer not registered')) {
       return res.status(404).json({ success: false, error: 'Manufacturer not found', code: 'NOT_REGISTERED' });
     }
@@ -400,18 +439,24 @@ router.get('/:address', async (req, res) => {
     if (!normalized) {
       return res.status(400).json({ success: false, error: 'Invalid Ethereum address - unable to normalize', received: address });
     }
-    const manufacturer = await blockchainService.getManufacturer(normalized);
+      if (isAddressNotRegisteredCached(normalized)) {
+        console.log(`⏱️ Cached: Address ${normalized} recently marked as NOT_REGISTERED, returning 404`);
+        return res.status(404).json({ success: false, error: 'Manufacturer not found (cached)', code: 'NOT_REGISTERED_CACHED', address: normalized });
+      }
+      const manufacturer = await blockchainService.getManufacturer(normalized);
     console.log(`✅ Manufacturer details retrieved: ${manufacturer.name}`);
     res.json({ success: true, data: { manufacturer, address: normalized } });
   } catch (error) {
     console.error('❌ Failed to get manufacturer:', error.message);
     if (error.message.includes('Manufacturer not registered')) {
-      return res.status(404).json({
-        success: false,
-        error: 'Manufacturer not found. This address has not been registered.',
-        code: 'NOT_REGISTERED',
-        address: req.params.address
-      });
+        // Cache the negative result so we don't hammer the chain
+        try { cacheAddressAsNotRegistered(normalizeAddress(req.params.address)); } catch (e) {}
+        return res.status(404).json({
+          success: false,
+          error: 'Manufacturer not found. This address has not been registered.',
+          code: 'NOT_REGISTERED',
+          address: req.params.address
+        });
     }
     res.status(500).json({ success: false, error: error.message, code: 'FETCH_FAILED' });
   }
