@@ -539,7 +539,19 @@ class BlockchainService {
         explorerUrl: `${networkConfig.explorerUrl}/tx/${tx.hash}`
       };
     } catch (error) {
-      console.error(`❌ Server write ${method} failed:`, error.message);
+      // Log structured error details for debugging
+      try {
+        console.error(`❌ Server write ${method} failed:`, error.message);
+        console.error('   ↳ details:', {
+          code: error?.code,
+          reason: error?.reason,
+          shortMessage: error?.shortMessage,
+          dataMessage: error?.data?.message,
+          infoMessage: error?.info?.error?.message,
+          causeMessage: error?.cause?.message,
+          body: error?.body ? (typeof error.body === 'string' ? error.body.slice(0, 500) : String(error.body)) : undefined,
+        });
+      } catch (_) { /* ignore logging errors */ }
       throw new Error(this.parseError(error));
     }
   }
@@ -552,6 +564,14 @@ class BlockchainService {
     if (error.reason) return error.reason;
     if (error.shortMessage) return error.shortMessage;
     if (error.data?.message) return error.data.message;
+    if (error.error?.message) return error.error.message;
+    if (error.info?.error?.message) return error.info.error.message;
+    if (typeof error.body === 'string') {
+      try {
+        const parsed = JSON.parse(error.body);
+        if (parsed?.error?.message) return parsed.error.message;
+      } catch (_) { /* ignore parse error */ }
+    }
     
     if (typeof error.message === 'string') {
       const message = error.message;

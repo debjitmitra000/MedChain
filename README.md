@@ -5,7 +5,7 @@
 ![MedChain Banner](https://via.placeholder.com/800x300/1a202c/ffffff?text=MedChain+%F0%9F%92%8A+Blockchain+Medicine+Authentication)
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![Ethereum](https://img.shields.io/badge/Ethereum-Sepolia-blue)](https://sepolia.etherscan.io/)
+[![Filecoin](https://img.shields.io/badge/Filecoin-Calibration-orange)](https://calibration.filfox.info/)
 [![Filecoin](https://img.shields.io/badge/Filecoin-Lighthouse-orange)](https://lighthouse.filecoin.io/)
 [![Node.js](https://img.shields.io/badge/Node.js-18+-green)](https://nodejs.org/)
 [![Solidity](https://img.shields.io/badge/Solidity-0.8.19-purple)](https://soliditylang.org/)
@@ -21,9 +21,13 @@
 
 ## 🌟 Overview
 
+# Copy environment template
+cp .env.example .env
+
 MedChain revolutionizes pharmaceutical supply chain security by leveraging **Ethereum blockchain**, **hypergraph data structures**, and **Filecoin's decentralized storage** to create an immutable, transparent medicine authentication system that combats counterfeit drugs globally.
 
-### 🎯 Key Features
+NETWORK=filecoin
+RPC_URL=https://api.calibration.node.glif.io/rpc/v1
 
 <div align="center">
 
@@ -466,7 +470,7 @@ Authorization: Bearer <wallet_signature>
     },
     "ipfs": {
       "kycDocumentHash": "QmX7K8yv4Np3rS9dE8mW5zA1bC6vF2nH9qT3lR4sJ8kP7",
-      "lightHouseUrl": "https://gateway.lighthouse.storage/ipfs/QmX7K8..."
+    npx hardhat deploy --network filecoin
     }
   }
 }

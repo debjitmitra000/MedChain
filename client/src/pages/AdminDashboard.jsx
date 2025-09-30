@@ -277,7 +277,7 @@ export default function AdminDashboard() {
                 </p>
                 <div className="text-sm opacity-75">
                   <p>• Check Alchemy API limits</p>
-                  <p>• Verify contract deployment on Sepolia</p>
+                  <p>• Verify contract deployment on Filecoin Calibration</p>
                   <p>• Some features may have limited data</p>
                 </div>
               </div>
@@ -316,9 +316,9 @@ export default function AdminDashboard() {
           </h2>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             {[
-              { to: '/manufacturer/verify', icon: CheckCircle2, title: 'Verify Manufacturers', desc: 'Review and approve manufacturer applications', color: 'emerald' },
-              { to: '/manufacturer/list?status=unverified', icon: Clock, title: 'Pending Approvals', desc: `${unverifiedManufacturers.length} manufacturers awaiting verification`, color: 'amber', badge: unverifiedManufacturers.length },
-              { to: '/reports/expired', icon: BarChart3, title: 'Expired Reports', desc: 'View expired medicine scan reports', color: 'red' }
+              { to: '/app/manufacturer/verify', icon: CheckCircle2, title: 'Verify Manufacturers', desc: 'Review and approve manufacturer applications', color: 'emerald' },
+              { to: '/app/manufacturer/list?status=unverified', icon: Clock, title: 'Pending Approvals', desc: `${unverifiedManufacturers.length} manufacturers awaiting verification`, color: 'amber', badge: unverifiedManufacturers.length },
+              { to: '/app/reports/expired', icon: BarChart3, title: 'Expired Reports', desc: 'View expired medicine scan reports', color: 'red' }
             ].map((action, index) => (
               <Link key={index} to={action.to} className="group">
                 <div className={`p-8 rounded-3xl border transition-all duration-300 hover:scale-105 ${
@@ -398,15 +398,15 @@ export default function AdminDashboard() {
                         </div>
                       </div>
                     </div>
-                    <Link to="/manufacturer/verify">
-                      <button className={`px-8 py-4 rounded-2xl font-bold transition-all duration-300 hover:scale-105 ${
-                        darkMode
-                          ? 'bg-gradient-to-r from-emerald-500 to-emerald-600 text-white hover:from-emerald-600 hover:to-emerald-700 shadow-lg shadow-emerald-500/25'
-                          : 'bg-gradient-to-r from-emerald-500 to-emerald-600 text-white hover:from-emerald-600 hover:to-emerald-700 shadow-lg shadow-emerald-500/25'
-                      }`}>
-                        Verify Now
-                      </button>
-                    </Link>
+                    <Link to="/app/manufacturer/verify">
+                  <button className={`px-8 py-4 rounded-2xl font-bold transition-all duration-300 hover:scale-105 ${
+                    darkMode
+                      ? 'bg-gradient-to-r from-emerald-500 to-emerald-600 text-white hover:from-emerald-600 hover:to-emerald-700 shadow-lg shadow-emerald-500/25'
+                      : 'bg-gradient-to-r from-emerald-500 to-emerald-600 text-white hover:from-emerald-600 hover:to-emerald-700 shadow-lg shadow-emerald-500/25'
+                  }`}>
+                    Verify Now
+                  </button>
+                </Link>
                   </div>
                 </div>
               ))}
@@ -414,7 +414,7 @@ export default function AdminDashboard() {
 
             {unverifiedManufacturers.length > 3 && (
               <div className="text-center mt-8">
-                <Link to="/manufacturer/list?status=unverified">
+                <Link to="/app/manufacturer/list?status=unverified">
                   <button className={`px-10 py-4 rounded-2xl font-bold transition-all duration-300 hover:scale-105 ${
                     darkMode
                       ? 'bg-slate-700 text-slate-300 hover:bg-slate-600 border border-slate-600'
@@ -554,7 +554,7 @@ export default function AdminDashboard() {
               </div>
               {reports.length > 5 && (
                 <div className="text-center mt-8">
-                  <Link to="/reports/expired">
+                  <Link to="/app/reports/expired">
                     <button className={`px-10 py-4 rounded-2xl font-bold transition-all duration-300 hover:scale-105 ${
                       darkMode
                         ? 'bg-slate-700 text-slate-300 hover:bg-slate-600 border border-slate-600'

@@ -80,10 +80,10 @@ if (REGISTRY_ABI.length > 0 && process.env.REGISTRY_CONTRACT_ADDRESS) {
 // Network configuration
 const networkConfig = {
   chainId: parseInt(process.env.CHAIN_ID, 10),
-  name: process.env.NETWORK === 'sepolia' ? 'Sepolia Testnet' : 'Ethereum Mainnet',
-  currency: 'ETH',
-  explorerUrl: process.env.NETWORK === 'sepolia' ? 'https://sepolia.etherscan.io' : 'https://etherscan.io',
-  isTestnet: process.env.NETWORK === 'sepolia'
+  name: process.env.NETWORK === 'filecoin' ? 'Filecoin Calibration Testnet' : (process.env.NETWORK === 'sepolia' ? 'Sepolia Testnet' : 'Ethereum'),
+  currency: process.env.NETWORK === 'filecoin' ? 'tFIL' : 'ETH',
+  explorerUrl: process.env.NETWORK === 'filecoin' ? (process.env.FILECOIN_EXPLORER_URL || 'https://calibration.filfox.info') : (process.env.NETWORK === 'sepolia' ? 'https://sepolia.etherscan.io' : 'https://etherscan.io'),
+  isTestnet: process.env.NETWORK === 'filecoin' || process.env.NETWORK === 'sepolia'
 };
 
 // Gas settings
@@ -97,10 +97,11 @@ const gasSettings = {
 // Startup checks
 (async () => {
   try {
-    const balanceWei = await readProvider.getBalance(wallet.address);
-    const balanceETH = ethers.formatEther(balanceWei);
-    console.log(`💰 Wallet Balance: ${balanceETH} ETH`);
-    if (balanceWei === 0n) console.warn('⚠️ Wallet has zero balance - writes will fail');
+  const balanceWei = await readProvider.getBalance(wallet.address);
+  const balanceFormatted = ethers.formatEther(balanceWei);
+  const currency = networkConfig.currency || 'ETH';
+  console.log(`💰 Wallet Balance: ${balanceFormatted} ${currency}`);
+  if (balanceWei === 0n) console.warn(`⚠️ Wallet has zero balance (${currency}) - writes will fail`);
   } catch (error) {
     console.warn('⚠️ Wallet balance check failed:', error.message);
   }

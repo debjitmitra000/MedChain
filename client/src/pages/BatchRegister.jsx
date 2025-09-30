@@ -24,6 +24,7 @@ import {
   ExternalLink,
   Zap,
 } from 'lucide-react';
+import { addNetworkToMetaMask, switchToNetwork } from '../utils/networks';
 
 export default function BatchRegister() {
   const { darkMode } = useTheme();
@@ -72,6 +73,28 @@ export default function BatchRegister() {
             <p className={`text-xl ${darkMode ? 'text-slate-300' : 'text-slate-600'}`}>
               Please connect your MetaMask wallet to register batches.
             </p>
+            <div className="mt-6 text-center">
+              <button
+                onClick={async () => {
+                  try {
+                    await addNetworkToMetaMask({
+                      chainId: 314159,
+                      name: 'Filecoin Calibration Testnet',
+                      rpcUrl: import.meta.env.VITE_FILECOIN_RPC_URL || 'https://api.calibration.node.glif.io/rpc/v1',
+                      explorerUrl: import.meta.env.VITE_FILECOIN_EXPLORER_URL || 'https://calibration.filfox.info',
+                      currency: 'tFIL'
+                    });
+                    await switchToNetwork(314159);
+                  } catch (e) {
+                    console.error('Add/switch failed:', e);
+                    alert('Failed to add/switch Filecoin Calibration in MetaMask. Please add it manually.');
+                  }
+                }}
+                className="mt-4 px-4 py-2 rounded-lg bg-amber-500 text-white font-semibold"
+              >
+                Add / Switch to Filecoin Calibration
+              </button>
+            </div>
           </div>
         </div>
       </div>
@@ -101,7 +124,7 @@ export default function BatchRegister() {
             <p className={`text-xl mb-8 ${darkMode ? 'text-slate-300' : 'text-slate-600'}`}>
               You need to be a registered manufacturer to register medicine batches.
             </p>
-            <Link to="/manufacturer/register">
+            <Link to="/app/manufacturer/register">
               <button className={`px-10 py-4 rounded-2xl font-bold transition-all duration-300 hover:scale-105 ${
                 darkMode
                   ? 'bg-gradient-to-r from-blue-500 to-blue-600 text-white hover:from-blue-600 hover:to-blue-700 shadow-lg shadow-blue-500/25'
@@ -142,7 +165,7 @@ export default function BatchRegister() {
             <p className={`text-lg mb-8 ${darkMode ? 'text-slate-400' : 'text-slate-500'}`}>
               Status: <span className="font-bold text-amber-500">Pending Verification</span>
             </p>
-            <Link to="/manufacturer/me">
+            <Link to="/app/manufacturer/me">
               <button className={`px-10 py-4 rounded-2xl font-bold transition-all duration-300 hover:scale-105 ${
                 darkMode
                   ? 'bg-gradient-to-r from-blue-500 to-blue-600 text-white hover:from-blue-600 hover:to-blue-700 shadow-lg shadow-blue-500/25'

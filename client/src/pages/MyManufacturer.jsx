@@ -100,7 +100,7 @@ export default function MyManufacturer() {
             <p className={`text-xl mb-8 ${darkMode ? 'text-slate-300' : 'text-slate-600'}`}>
               You are not registered as a manufacturer in the system.
             </p>
-            <Link to="/manufacturer/register">
+            <Link to="/app/manufacturer/register">
               <button className={`px-10 py-4 rounded-2xl font-bold transition-all duration-300 hover:scale-105 ${
                 darkMode
                   ? 'bg-gradient-to-r from-blue-500 to-blue-600 text-white hover:from-blue-600 hover:to-blue-700 shadow-lg shadow-blue-500/25'
@@ -276,7 +276,7 @@ export default function MyManufacturer() {
               {/* Action Buttons */}
               <div className="flex flex-wrap gap-4 mt-8">
                 {canRegisterBatch && (
-                  <Link to="/batch/register">
+                  <Link to="/app/batch/register">
                     <button className={`px-8 py-4 rounded-2xl font-bold transition-all duration-300 hover:scale-105 flex items-center gap-3 ${
                       darkMode
                         ? 'bg-gradient-to-r from-emerald-500 to-emerald-600 text-white hover:from-emerald-600 hover:to-emerald-700 shadow-lg shadow-emerald-500/25'
@@ -288,7 +288,7 @@ export default function MyManufacturer() {
                   </Link>
                 )}
                 
-                <Link to="/manufacturer/me/batches">
+                <Link to="/app/manufacturer/me/batches">
                   <button className={`px-8 py-4 rounded-2xl font-bold transition-all duration-300 hover:scale-105 flex items-center gap-3 ${
                     darkMode
                       ? 'bg-gradient-to-r from-blue-500 to-blue-600 text-white hover:from-blue-600 hover:to-blue-700 shadow-lg shadow-blue-500/25'
@@ -437,7 +437,7 @@ export default function MyManufacturer() {
                     Start building your medicine portfolio by registering your first batch.
                   </p>
                   {canRegisterBatch ? (
-                    <Link to="/batch/register">
+                    <Link to="/app/batch/register">
                       <button className={`px-8 py-4 rounded-2xl font-bold transition-all duration-300 hover:scale-105 flex items-center gap-3 mx-auto ${
                         darkMode
                           ? 'bg-gradient-to-r from-emerald-500 to-emerald-600 text-white hover:from-emerald-600 hover:to-emerald-700'
@@ -491,7 +491,7 @@ export default function MyManufacturer() {
                               <Package className={`w-6 h-6 text-${batchStatusInfo.color}-500`} />
                               <div>
                                 <Link 
-                                  to={`/batch/${batch.batchId}`}
+                                  to={`/app/batch/${batch.batchId}`}
                                   className={`text-xl font-bold hover:underline ${
                                     darkMode ? 'text-white hover:text-emerald-400' : 'text-slate-900 hover:text-emerald-600'
                                   }`}
@@ -542,7 +542,7 @@ export default function MyManufacturer() {
                               {batchStatusInfo.text}
                             </div>
                             
-                            <Link to={`/batch/${batch.batchId}`}>
+                            <Link to={`/app/batch/${batch.batchId}`}>
                               <button className={`px-6 py-3 rounded-2xl font-bold transition-all duration-300 hover:scale-105 flex items-center gap-2 ${
                                 darkMode
                                   ? 'bg-gradient-to-r from-blue-500 to-blue-600 text-white hover:from-blue-600 hover:to-blue-700'
@@ -560,7 +560,7 @@ export default function MyManufacturer() {
                   
                   {batches.length > 3 && (
                     <div className="text-center pt-6">
-                      <Link to="/manufacturer/me/batches">
+                      <Link to="/app/manufacturer/me/batches">
                         <button className={`px-8 py-4 rounded-2xl font-bold transition-all duration-300 hover:scale-105 flex items-center gap-3 mx-auto ${
                           darkMode
                             ? 'bg-gradient-to-r from-purple-500 to-purple-600 text-white hover:from-purple-600 hover:to-purple-700'
@@ -596,7 +596,7 @@ export default function MyManufacturer() {
               
               <div className="space-y-4">
                 {canRegisterBatch && (
-                  <Link to="/batch/register">
+                  <Link to="/app/batch/register">
                     <button className={`w-full px-6 py-4 rounded-2xl font-bold transition-all duration-300 hover:scale-105 flex items-center justify-between ${
                       darkMode
                         ? 'bg-gradient-to-r from-emerald-500 to-emerald-600 text-white hover:from-emerald-600 hover:to-emerald-700'
@@ -608,7 +608,7 @@ export default function MyManufacturer() {
                   </Link>
                 )}
                 
-                <Link to="/manufacturer/me/batches">
+                <Link to="/app/manufacturer/me/batches">
                   <button className={`w-full px-6 py-4 rounded-2xl font-bold transition-all duration-300 hover:scale-105 flex items-center justify-between ${
                     darkMode
                       ? 'bg-slate-700 text-slate-300 hover:bg-slate-600 border border-slate-600'

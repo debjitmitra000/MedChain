@@ -144,8 +144,8 @@ app.get('/health', async (req, res) => {
       },
       wallet: {
         address: balance.address,
-        balance: `${balance.balanceEth} ETH`,
-        hasBalance: parseFloat(balance.balanceEth) > 0
+        balance: balance.balance,
+        currency: balance.currency || (process.env.NETWORK === 'filecoin' ? 'tFIL' : 'ETH')
       },
       features: {
         ipfs: false,

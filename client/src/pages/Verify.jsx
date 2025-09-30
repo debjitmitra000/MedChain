@@ -138,7 +138,7 @@ export default function Verify() {
           console.log('Navigating to batch:', batchId);
           
           // Use navigate with the batch ID directly
-          navigate(`/verify/${batchId}`, { replace: true });
+          navigate(`/app/verify/${batchId}`, { replace: true });
           
           // Also set the input field
           setInputBatchId(batchId);
@@ -451,7 +451,7 @@ export default function Verify() {
     
     // Update URL if different
     if (inputBatchId !== batchId) {
-      navigate(`/verify/${inputBatchId}`, { replace: true });
+      navigate(`/app/verify/${inputBatchId}`, { replace: true });
     }
   };
 

@@ -206,7 +206,7 @@ export default function ExpiredReports() {
                   </span>
                 </div>
                 <Link 
-                  to={`/batch/${summary.mostScannedBatch.batchId}`}
+                  to={`/app/batch/${summary.mostScannedBatch.batchId}`}
                   className={`block text-lg font-bold font-mono hover:underline ${
                     darkMode ? 'text-white hover:text-red-400' : 'text-slate-900 hover:text-red-600'
                   }`}
@@ -283,7 +283,7 @@ export default function ExpiredReports() {
                         <AlertTriangle className="w-8 h-8 text-amber-500" />
                         <div>
                           <Link 
-                            to={`/batch/${report.batchId}`}
+                            to={`/app/batch/${report.batchId}`}
                             className={`text-2xl font-bold hover:underline ${
                               darkMode ? 'text-white hover:text-amber-400' : 'text-slate-900 hover:text-amber-600'
                             }`}
@@ -362,7 +362,7 @@ export default function ExpiredReports() {
                     
                     <div className="flex flex-col sm:flex-row gap-4">
                       <Link 
-                        to={`/batch/${report.batchId}`}
+                        to={`/app/batch/${report.batchId}`}
                         onClick={(e) => e.stopPropagation()}
                       >
                         <button className={`px-8 py-4 rounded-2xl font-bold transition-all duration-300 hover:scale-105 flex items-center gap-3 ${

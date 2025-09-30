@@ -3,6 +3,8 @@ import { useNavigate } from 'react-router-dom';
 import { useAccount } from 'wagmi';
 import { useRole } from './hooks/useRole';
 import WalletConnect from './components/WalletConnect.jsx';
+// Adding a console log to debug rendering
+console.log("LandingPage component loaded");
 import { useTheme } from './contexts/ThemeContext';
 import {
   Sun,
@@ -48,11 +50,11 @@ export default function LandingPage() {
       // Small delay to ensure role is properly detected
       const timer = setTimeout(() => {
         if (isAdmin) {
-          navigate('/admin');
+          navigate('/app/admin');
         } else if (isManufacturer) {
-          navigate('/manufacturer/me');
+          navigate('/app/manufacturer/me');
         } else {
-          navigate('/verify');
+          navigate('/app/verify');
         }
       }, 500);
       

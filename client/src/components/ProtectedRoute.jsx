@@ -38,7 +38,7 @@ export default function ProtectedRoute({
         <p>This page requires {roleNames[requiredRole]} access.</p>
         <p>Your current role: {roleNames[role] || 'Guest'}</p>
         {requiredRole === 'manufacturer' && role === 'user' && (
-          <Link to="/manufacturer/register">
+          <Link to="/app/manufacturer/register">
             <button style={{ backgroundColor: '#0088aa', color: 'white', padding: '12px 24px' }}>
               Register as Manufacturer
             </button>
@@ -55,7 +55,7 @@ export default function ProtectedRoute({
         <h3>Verification Required</h3>
         <p>This action requires admin verification of your manufacturer account.</p>
         <p>Status: <span style={{ color: '#ff8800' }}>Pending Verification</span></p>
-        <Link to="/manufacturer/me">
+        <Link to="/app/manufacturer/me">
           <button style={{ backgroundColor: '#0088aa', color: 'white', padding: '12px 24px' }}>
             View My Profile
           </button>

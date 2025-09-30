@@ -94,7 +94,7 @@ export default function MyBatches() {
             <p className={`text-xl mb-8 ${darkMode ? 'text-slate-300' : 'text-slate-600'}`}>
               You need to be a registered manufacturer to view this page.
             </p>
-            <Link to="/manufacturer/register">
+            <Link to="/app/manufacturer/register">
               <button className={`px-10 py-4 rounded-2xl font-bold transition-all duration-300 hover:scale-105 ${
                 darkMode
                   ? 'bg-gradient-to-r from-blue-500 to-blue-600 text-white hover:from-blue-600 hover:to-blue-700 shadow-lg shadow-blue-500/25'
@@ -257,7 +257,7 @@ export default function MyBatches() {
             </div>
             
             {canRegisterBatch && (
-              <Link to="/batch/register">
+              <Link to="/app/batch/register">
                 <button className={`px-8 py-4 rounded-2xl font-bold transition-all duration-300 hover:scale-105 flex items-center gap-3 ${
                   darkMode
                     ? 'bg-gradient-to-r from-emerald-500 to-emerald-600 text-white hover:from-emerald-600 hover:to-emerald-700 shadow-lg shadow-emerald-500/25'
@@ -381,7 +381,7 @@ export default function MyBatches() {
             </p>
             
             {canRegisterBatch ? (
-              <Link to="/batch/register">
+              <Link to="/app/batch/register">
                 <button className={`px-10 py-4 rounded-2xl font-bold transition-all duration-300 hover:scale-105 flex items-center gap-3 mx-auto ${
                   darkMode
                     ? 'bg-gradient-to-r from-emerald-500 to-emerald-600 text-white hover:from-emerald-600 hover:to-emerald-700'
@@ -396,7 +396,7 @@ export default function MyBatches() {
                 <p className={`${darkMode ? 'text-slate-400' : 'text-slate-500'}`}>
                   Complete manufacturer verification to register batches.
                 </p>
-                <Link to="/manufacturer/me">
+                <Link to="/app/manufacturer/me">
                   <button className={`px-8 py-4 rounded-2xl font-bold transition-all duration-300 hover:scale-105 ${
                     darkMode
                       ? 'bg-gradient-to-r from-blue-500 to-blue-600 text-white hover:from-blue-600 hover:to-blue-700'
@@ -432,7 +432,7 @@ export default function MyBatches() {
                           <StatusIcon className={`w-8 h-8 text-${statusInfo.color}-500`} />
                           <div>
                             <Link 
-                              to={`/batch/${batch.batchId}`}
+                              to={`/app/batch/${batch.batchId}`}
                               className={`text-2xl font-bold hover:underline ${
                                 darkMode ? 'text-white hover:text-emerald-400' : 'text-slate-900 hover:text-emerald-600'
                               }`}
@@ -537,7 +537,7 @@ export default function MyBatches() {
                       </div>
                       
                       <div className="flex flex-col sm:flex-row gap-4">
-                        <Link to={`/batch/${batch.batchId}`}>
+                        <Link to={`/app/batch/${batch.batchId}`}>
                           <button className={`px-8 py-4 rounded-2xl font-bold transition-all duration-300 hover:scale-105 flex items-center gap-3 ${
                             darkMode
                               ? 'bg-gradient-to-r from-blue-500 to-blue-600 text-white hover:from-blue-600 hover:to-blue-700'
@@ -549,7 +549,7 @@ export default function MyBatches() {
                         </Link>
                         
                         {!batch.isRecalled && batch.isActive && (
-                          <Link to={`/batch/${batch.batchId}/recall`}>
+                          <Link to={`/app/batch/${batch.batchId}/recall`}>
                             <button className={`px-8 py-4 rounded-2xl font-bold transition-all duration-300 hover:scale-105 flex items-center gap-3 ${
                               darkMode
                                 ? 'bg-gradient-to-r from-red-500 to-red-600 text-white hover:from-red-600 hover:to-red-700'

@@ -330,7 +330,7 @@ export default function ManufacturerList() {
                       </div>
                       
                       <Link 
-                        to={`/manufacturer/${mfr.wallet}`}
+                        to={`/app/manufacturer/${mfr.wallet}`}
                         className={`flex items-center gap-2 px-6 py-3 rounded-2xl font-semibold transition-all duration-300 hover:scale-105 ${
                           darkMode
                             ? 'bg-gradient-to-r from-blue-500 to-blue-600 text-white hover:from-blue-600 hover:to-blue-700'
