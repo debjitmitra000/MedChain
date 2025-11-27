@@ -20,6 +20,7 @@ import {
   Info,
   ExternalLink,
 } from 'lucide-react';
+import { addNetworkToMetaMask, switchToNetwork } from '../utils/networks';
 
 export default function RecallBatch() {
   const { batchId } = useParams();
@@ -177,6 +178,28 @@ export default function RecallBatch() {
             }`}>
               Initiate an emergency recall for this medicine batch
             </p>
+            <div className="mt-6 text-center">
+              <button
+                onClick={async () => {
+                  try {
+                    await addNetworkToMetaMask({
+                      chainId: 314159,
+                      name: 'Filecoin Calibration Testnet',
+                      rpcUrl: import.meta.env.VITE_FILECOIN_RPC_URL || 'https://api.calibration.node.glif.io/rpc/v1',
+                      explorerUrl: import.meta.env.VITE_FILECOIN_EXPLORER_URL || 'https://calibration.filfox.info',
+                      currency: 'tFIL'
+                    });
+                    await switchToNetwork(314159);
+                  } catch (e) {
+                    console.error('Add/switch failed:', e);
+                    alert('Failed to add/switch Filecoin Calibration in MetaMask. Please add it manually.');
+                  }
+                }}
+                className="mt-4 px-4 py-2 rounded-lg bg-amber-500 text-white font-semibold"
+              >
+                Add / Switch to Filecoin Calibration
+              </button>
+            </div>
           </div>
         </div>
 
@@ -473,7 +496,7 @@ export default function RecallBatch() {
                 
                 <div className="flex flex-col sm:flex-row gap-6">
                   <button 
-                    onClick={() => navigate(`/batch/${batchId}`)}
+                    onClick={() => navigate(`/app/batch/${batchId}`)}
                     className={`flex-1 px-8 py-4 rounded-2xl font-bold transition-all duration-300 hover:scale-105 flex items-center justify-center gap-3 ${
                       darkMode
                         ? 'bg-gradient-to-r from-emerald-500 to-emerald-600 text-white hover:from-emerald-600 hover:to-emerald-700'
@@ -484,7 +507,7 @@ export default function RecallBatch() {
                     View Batch Details
                   </button>
                   <button 
-                    onClick={() => navigate('/')}
+                    onClick={() => navigate('/app/home')}
                     className={`flex-1 px-8 py-4 rounded-2xl font-bold transition-all duration-300 hover:scale-105 flex items-center justify-center gap-3 ${
                       darkMode
                         ? 'bg-slate-700 text-slate-300 hover:bg-slate-600 border border-slate-600'

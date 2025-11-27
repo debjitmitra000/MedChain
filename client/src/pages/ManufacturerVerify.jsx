@@ -25,6 +25,7 @@ import {
   UserX,
   AlertCircle,
 } from 'lucide-react';
+import { addNetworkToMetaMask, switchToNetwork } from '../utils/networks';
 
 export default function ManufacturerVerify() {
   const { darkMode } = useTheme();
@@ -92,6 +93,28 @@ export default function ManufacturerVerify() {
               <p className={`text-lg ${darkMode ? 'text-slate-300' : 'text-slate-600'}`}>
                 Connect with admin wallet to continue.
               </p>
+              <div className="mt-6 text-center">
+                <button
+                  onClick={async () => {
+                    try {
+                      await addNetworkToMetaMask({
+                        chainId: 314159,
+                        name: 'Filecoin Calibration Testnet',
+                        rpcUrl: import.meta.env.VITE_FILECOIN_RPC_URL || 'https://api.calibration.node.glif.io/rpc/v1',
+                        explorerUrl: import.meta.env.VITE_FILECOIN_EXPLORER_URL || 'https://calibration.filfox.info',
+                        currency: 'tFIL'
+                      });
+                      await switchToNetwork(314159);
+                    } catch (e) {
+                      console.error('Add/switch failed:', e);
+                      alert('Failed to add/switch Filecoin Calibration in MetaMask. Please add it manually.');
+                    }
+                  }}
+                  className="mt-4 px-4 py-2 rounded-lg bg-amber-500 text-white font-semibold"
+                >
+                  Add / Switch to Filecoin Calibration
+                </button>
+              </div>
             </div>
           </div>
         </div>

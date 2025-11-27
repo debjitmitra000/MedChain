@@ -3,7 +3,11 @@ import { useNavigate } from 'react-router-dom';
 import { useAccount } from 'wagmi';
 import { useRole } from './hooks/useRole';
 import WalletConnect from './components/WalletConnect.jsx';
+import { motion, AnimatePresence } from 'framer-motion';
 import { useTheme } from './contexts/ThemeContext';
+
+// Adding a console log to debug rendering
+console.log("LandingPage component loaded");
 import {
   Sun,
   Moon,
@@ -31,7 +35,7 @@ export default function LandingPage() {
   const navigate = useNavigate();
   const { isConnected } = useAccount();
   const { role, isAdmin, isManufacturer } = useRole();
-  
+
   const { darkMode, toggleTheme } = useTheme();
   const [scrollY, setScrollY] = useState(0);
   const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
@@ -48,24 +52,26 @@ export default function LandingPage() {
       // Small delay to ensure role is properly detected
       const timer = setTimeout(() => {
         if (isAdmin) {
-          navigate('/admin');
+          navigate('/app/admin');
         } else if (isManufacturer) {
-          navigate('/manufacturer/me');
+          navigate('/app/manufacturer/me');
         } else {
-          navigate('/verify');
+          navigate('/app/verify');
         }
       }, 500);
-      
+
       return () => clearTimeout(timer);
     }
   }, [isConnected, isAdmin, isManufacturer, navigate]);
 
+  // Scroll progress logic
   useEffect(() => {
     const handleScroll = () => setScrollY(window.scrollY);
     window.addEventListener("scroll", handleScroll);
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
+  // Mouse movement for QR character eyes
   useEffect(() => {
     const handleMouseMove = (e) => {
       if (qrRef.current) {
@@ -82,45 +88,6 @@ export default function LandingPage() {
 
     window.addEventListener("mousemove", handleMouseMove);
     return () => window.removeEventListener("mousemove", handleMouseMove);
-  }, []);
-
-  useEffect(() => {
-    const observerOptions = {
-      threshold: 0.15,
-      rootMargin: "0px 0px -100px 0px",
-    };
-
-    const animateOnScroll = (entries) => {
-      entries.forEach((entry) => {
-        if (entry.isIntersecting) {
-          const element = entry.target;
-          element.classList.remove("opacity-0", "translate-y-10");
-          element.classList.add("opacity-100", "translate-y-0");
-
-          // Animate children with stagger effect
-          const animatedChildren =
-            element.querySelectorAll(".animate-on-scroll");
-          animatedChildren.forEach((child, index) => {
-            setTimeout(() => {
-              child.classList.remove("opacity-0", "translate-y-4", "scale-95");
-              child.classList.add("opacity-100", "translate-y-0", "scale-100");
-            }, index * 150);
-          });
-        }
-      });
-    };
-
-    const observer = new IntersectionObserver(animateOnScroll, observerOptions);
-
-    // Observe all sections when they're available
-    const sections = [stackRef, featuresRef, aboutRef, ctaRef];
-    sections.forEach((ref) => {
-      if (ref.current) {
-        observer.observe(ref.current);
-      }
-    });
-
-    return () => observer.disconnect();
   }, []);
 
 
@@ -146,18 +113,16 @@ export default function LandingPage() {
 
   return (
     <div
-      className={`min-h-screen font-sans overflow-x-hidden transition-colors duration-500 ${
-        darkMode ? "bg-slate-950 text-white" : "bg-white text-slate-900"
-      }`}
+      className={`min-h-screen font-sans overflow-x-hidden transition-colors duration-500 ${darkMode ? "bg-slate-950 text-white" : "bg-white text-slate-900"
+        }`}
     >
       {/* Theme Toggle Button */}
       <button
         onClick={toggleTheme}
-        className={`fixed top-6 right-6 z-50 p-3 rounded-full transition-all duration-300 backdrop-blur-sm hover:scale-105 ${
-          darkMode
-            ? "bg-slate-800/80 hover:bg-slate-700/80 text-cyan-400 shadow-lg shadow-cyan-400/20"
-            : "bg-white/80 hover:bg-slate-50/80 text-slate-700 shadow-lg shadow-slate-300/30"
-        }`}
+        className={`fixed top-6 right-6 z-50 p-3 rounded-full transition-all duration-300 backdrop-blur-sm hover:scale-105 ${darkMode
+          ? "bg-slate-800/80 hover:bg-slate-700/80 text-cyan-400 shadow-lg shadow-cyan-400/20"
+          : "bg-white/80 hover:bg-slate-50/80 text-slate-700 shadow-lg shadow-slate-300/30"
+          }`}
       >
         {darkMode ? <Sun size={24} /> : <Moon size={24} />}
       </button>
@@ -169,7 +134,7 @@ export default function LandingPage() {
           style={{
             width: `${Math.min(
               (scrollY / (document.body.scrollHeight - window.innerHeight)) *
-                100,
+              100,
               100
             )}%`,
           }}
@@ -181,9 +146,8 @@ export default function LandingPage() {
         {/* Animated Background */}
         <div className="absolute inset-0">
           <div
-            className={`absolute inset-0 opacity-20 ${
-              darkMode ? "" : "opacity-30"
-            }`}
+            className={`absolute inset-0 opacity-20 ${darkMode ? "" : "opacity-30"
+              }`}
             style={{
               backgroundImage: darkMode
                 ? "url('https://www.transparenttextures.com/patterns/concrete-wall.png')"
@@ -261,9 +225,8 @@ export default function LandingPage() {
             className="absolute top-[15%] left-1/2 -translate-x-1/2 z-10 animate-qrFloat flex justify-center"
           >
             <div
-              className={`relative w-24 h-24 sm:w-28 sm:h-28 md:w-32 md:h-32 p-2 rounded-lg ${
-                darkMode ? "bg-white" : "bg-slate-900"
-              } shadow-lg hover:scale-110 transition-all duration-300`}
+              className={`relative w-24 h-24 sm:w-28 sm:h-28 md:w-32 md:h-32 p-2 rounded-lg ${darkMode ? "bg-white" : "bg-slate-900"
+                } shadow-lg hover:scale-110 transition-all duration-300`}
             >
               {/* QR Code Pattern */}
               <div className="w-full h-full grid grid-cols-8 gap-[1px]">
@@ -278,15 +241,14 @@ export default function LandingPage() {
                   return (
                     <div
                       key={i}
-                      className={`aspect-square ${
-                        isCornerSquare || isRandomPattern
-                          ? darkMode
-                            ? "bg-slate-900"
-                            : "bg-white"
-                          : darkMode
+                      className={`aspect-square ${isCornerSquare || isRandomPattern
+                        ? darkMode
+                          ? "bg-slate-900"
+                          : "bg-white"
+                        : darkMode
                           ? "bg-white"
                           : "bg-slate-900"
-                      }`}
+                        }`}
                     />
                   );
                 })}
@@ -296,16 +258,13 @@ export default function LandingPage() {
               <div className="absolute inset-0 flex items-center justify-center gap-6 -top-6">
                 {/* Left Eye */}
                 <div
-                  className={`w-8 h-8 rounded-full ${
-                    darkMode ? "bg-slate-900" : "bg-white"
-                  } border-2 ${
-                    darkMode ? "border-white" : "border-slate-900"
-                  } flex items-center justify-center animate-qrBlink overflow-hidden`}
+                  className={`w-8 h-8 rounded-full ${darkMode ? "bg-slate-900" : "bg-white"
+                    } border-2 ${darkMode ? "border-white" : "border-slate-900"
+                    } flex items-center justify-center animate-qrBlink overflow-hidden`}
                 >
                   <div
-                    className={`w-3 h-3 rounded-full ${
-                      darkMode ? "bg-white" : "bg-slate-900"
-                    } transition-transform duration-100`}
+                    className={`w-3 h-3 rounded-full ${darkMode ? "bg-white" : "bg-slate-900"
+                      } transition-transform duration-100`}
                     style={{
                       transform: `translate(${Math.max(
                         -1.5,
@@ -320,17 +279,14 @@ export default function LandingPage() {
 
                 {/* Right Eye */}
                 <div
-                  className={`w-8 h-8 rounded-full ${
-                    darkMode ? "bg-slate-900" : "bg-white"
-                  } border-2 ${
-                    darkMode ? "border-white" : "border-slate-900"
-                  } flex items-center justify-center animate-qrBlink overflow-hidden`}
+                  className={`w-8 h-8 rounded-full ${darkMode ? "bg-slate-900" : "bg-white"
+                    } border-2 ${darkMode ? "border-white" : "border-slate-900"
+                    } flex items-center justify-center animate-qrBlink overflow-hidden`}
                   style={{ animationDelay: "0.1s" }}
                 >
                   <div
-                    className={`w-3 h-3 rounded-full ${
-                      darkMode ? "bg-white" : "bg-slate-900"
-                    } transition-transform duration-100`}
+                    className={`w-3 h-3 rounded-full ${darkMode ? "bg-white" : "bg-slate-900"
+                      } transition-transform duration-100`}
                     style={{
                       transform: `translate(${Math.max(
                         -1.5,
@@ -349,9 +305,8 @@ export default function LandingPage() {
           {/* MEDCHAIN Title */}
           <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-10">
             <h1
-              className={`text-[12vmin] sm:text-[15vmin] md:text-[18vmin] lg:text-[22vmin] xl:text-[25vmin] font-extrabold font-sans transition-colors duration-500 select-none ${
-                darkMode ? "text-white" : "text-slate-900"
-              }`}
+              className={`text-[12vmin] sm:text-[15vmin] md:text-[18vmin] lg:text-[22vmin] xl:text-[25vmin] font-extrabold font-sans transition-colors duration-500 select-none ${darkMode ? "text-white" : "text-slate-900"
+                }`}
               style={{
                 textShadow: darkMode
                   ? "0 0 30px rgba(6, 182, 212, 0.3)"
@@ -397,25 +352,23 @@ export default function LandingPage() {
         >
           <div className="mb-6 md:mb-8 space-y-3 md:space-y-4">
             <p
-              className={`text-sm sm:text-base md:text-lg lg:text-xl xl:text-2xl transition-colors duration-500 leading-tight ${
-                darkMode ? "text-slate-300" : "text-slate-600"
-              }`}
+              className={`text-sm sm:text-base md:text-lg lg:text-xl xl:text-2xl transition-colors duration-500 leading-tight ${darkMode ? "text-slate-300" : "text-slate-600"
+                }`}
             >
               Decentralized Medicine Authentication & Expiry Tracking
             </p>
-            
+
           </div>
-          
+
           {/* Connect Wallet Button - Centered */}
           <div className="w-full flex flex-col items-center justify-center gap-4">
             <div className="flex justify-center">
               <WalletConnect />
             </div>
-            
+
             {/* Info text */}
-            <p className={`text-xs md:text-sm transition-colors duration-500 ${
-              darkMode ? 'text-slate-500' : 'text-slate-600'
-            }`}>
+            <p className={`text-xs md:text-sm transition-colors duration-500 ${darkMode ? 'text-slate-500' : 'text-slate-600'
+              }`}>
               Connect your wallet to access the dashboard
             </p>
           </div>
@@ -427,14 +380,12 @@ export default function LandingPage() {
           className="absolute bottom-1 left-1/2 transform -translate-x-1/2 cursor-pointer group z-40"
         >
           <div
-            className={`relative flex flex-col items-center mt-4 transition-colors duration-500 ${
-              darkMode ? "text-slate-400" : "text-slate-600"
-            }`}
+            className={`relative flex flex-col items-center mt-4 transition-colors duration-500 ${darkMode ? "text-slate-400" : "text-slate-600"
+              }`}
           >
             <div
-              className={`w-6 h-10 border-2 rounded-full flex justify-center relative group-hover:border-emerald-400 transition-colors ${
-                darkMode ? "border-slate-400" : "border-slate-600"
-              }`}
+              className={`w-6 h-10 border-2 rounded-full flex justify-center relative group-hover:border-emerald-400 transition-colors ${darkMode ? "border-slate-400" : "border-slate-600"
+                }`}
             >
               <div className="absolute top-2 w-1 h-3 bg-gradient-to-b from-emerald-400 to-cyan-400 rounded-full animate-scrollIndicator"></div>
             </div>
@@ -447,12 +398,14 @@ export default function LandingPage() {
       </section>
 
       {/* Technology Stack Section */}
-      <section
-        ref={stackRef}
+      <motion.section
         id="stack"
-        className={`py-20 px-6 opacity-0 translate-y-10 transition-all duration-1000 ease-out ${
-          darkMode ? "bg-slate-900/50" : "bg-slate-50/50"
-        }`}
+        initial={{ opacity: 0, y: 50 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        viewport={{ once: true, margin: "-100px" }}
+        transition={{ duration: 0.8 }}
+        className={`py-20 px-6 ${darkMode ? "bg-slate-900/50" : "bg-slate-50/50"
+          }`}
       >
         <div className="max-w-6xl mx-auto">
           <h2 className="text-3xl md:text-4xl font-bold text-center mb-16">
@@ -471,7 +424,7 @@ export default function LandingPage() {
                 icon: Globe2,
                 title: "ENS Integration",
                 description: "Human-readable names for manufacturers and healthcare providers using Ethereum Name Service",
-                color: "text-purple-400", 
+                color: "text-purple-400",
                 bgGradient: "from-purple-500/10 to-purple-600/10",
               },
               {
@@ -482,13 +435,16 @@ export default function LandingPage() {
                 bgGradient: "from-cyan-500/10 to-cyan-600/10",
               },
             ].map((tech, index) => (
-              <div
+              <motion.div
                 key={index}
-                className={`animate-on-scroll opacity-0 translate-y-4 scale-95 transition-all duration-700 ease-out p-8 rounded-2xl shadow-lg hover:scale-105 group ${
-                  darkMode
-                    ? `bg-gradient-to-br ${tech.bgGradient} backdrop-blur-sm border border-slate-700/50 hover:border-slate-600/50`
-                    : `bg-gradient-to-br ${tech.bgGradient} backdrop-blur-sm border border-slate-200/50 hover:border-slate-300/50`
-                }`}
+                initial={{ opacity: 0, y: 20, scale: 0.95 }}
+                whileInView={{ opacity: 1, y: 0, scale: 1 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.5, delay: index * 0.1 }}
+                className={`p-8 rounded-2xl shadow-lg hover:scale-105 group ${darkMode
+                  ? `bg-gradient-to-br ${tech.bgGradient} backdrop-blur-sm border border-slate-700/50 hover:border-slate-600/50`
+                  : `bg-gradient-to-br ${tech.bgGradient} backdrop-blur-sm border border-slate-200/50 hover:border-slate-300/50`
+                  }`}
               >
                 <div className="flex flex-col items-center text-center">
                   <div className={`p-4 rounded-full ${darkMode ? 'bg-slate-800/60' : 'bg-white/60'} mb-4 group-hover:scale-110 transition-transform`}>
@@ -498,39 +454,38 @@ export default function LandingPage() {
                     />
                   </div>
                   <h3
-                    className={`text-xl font-semibold mb-4 transition-colors duration-500 ${
-                      darkMode ? "text-white" : "text-slate-900"
-                    }`}
+                    className={`text-xl font-semibold mb-4 transition-colors duration-500 ${darkMode ? "text-white" : "text-slate-900"
+                      }`}
                   >
                     {tech.title}
                   </h3>
                   <p
-                    className={`text-sm leading-relaxed transition-colors duration-500 ${
-                      darkMode ? "text-slate-300" : "text-slate-700"
-                    }`}
+                    className={`text-sm leading-relaxed transition-colors duration-500 ${darkMode ? "text-slate-300" : "text-slate-700"
+                      }`}
                   >
                     {tech.description}
                   </p>
                 </div>
-              </div>
+              </motion.div>
             ))}
           </div>
         </div>
-      </section>
+      </motion.section>
 
       {/* Features Section */}
-      <section
-        ref={featuresRef}
+      <motion.section
         id="features"
-        className={`py-24 px-6 md:px-16 opacity-0 translate-y-10 transition-all duration-1000 ease-out ${
-          darkMode ? "bg-slate-900" : "bg-slate-50"
-        }`}
+        initial={{ opacity: 0, y: 50 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        viewport={{ once: true, margin: "-100px" }}
+        transition={{ duration: 0.8 }}
+        className={`py-24 px-6 md:px-16 ${darkMode ? "bg-slate-900" : "bg-slate-50"
+          }`}
       >
         <div className="max-w-6xl mx-auto">
           <h2
-            className={`text-3xl md:text-5xl font-bold text-center mb-16 transition-colors duration-500 ${
-              darkMode ? "text-white" : "text-slate-900"
-            }`}
+            className={`text-3xl md:text-5xl font-bold text-center mb-16 transition-colors duration-500 ${darkMode ? "text-white" : "text-slate-900"
+              }`}
           >
             Why <span className="text-emerald-400">MedChain?</span>
           </h2>
@@ -558,13 +513,16 @@ export default function LandingPage() {
                 color: "text-blue-400",
               },
             ].map((feature, index) => (
-              <div
+              <motion.div
                 key={index}
-                className={`animate-on-scroll opacity-0 translate-y-4 scale-95 transition-all duration-700 ease-out p-6 md:p-8 rounded-2xl shadow-lg hover:scale-105 group ${
-                  darkMode
-                    ? "bg-slate-800 hover:bg-slate-700 shadow-slate-900/50"
-                    : "bg-white hover:bg-slate-50 shadow-slate-300/30"
-                }`}
+                initial={{ opacity: 0, y: 20, scale: 0.95 }}
+                whileInView={{ opacity: 1, y: 0, scale: 1 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.5, delay: index * 0.1 }}
+                className={`p-6 md:p-8 rounded-2xl shadow-lg hover:scale-105 group ${darkMode
+                  ? "bg-slate-800 hover:bg-slate-700 shadow-slate-900/50"
+                  : "bg-white hover:bg-slate-50 shadow-slate-300/30"
+                  }`}
               >
                 <div className="flex items-start mb-4">
                   <feature.icon
@@ -572,32 +530,32 @@ export default function LandingPage() {
                     size={28}
                   />
                   <h3
-                    className={`text-lg md:text-xl font-semibold transition-colors duration-500 ${
-                      darkMode ? "text-white" : "text-slate-900"
-                    }`}
+                    className={`text-lg md:text-xl font-semibold transition-colors duration-500 ${darkMode ? "text-white" : "text-slate-900"
+                      }`}
                   >
                     {feature.title}
                   </h3>
                 </div>
                 <p
-                  className={`text-sm md:text-base leading-relaxed transition-colors duration-500 ${
-                    darkMode ? "text-slate-300" : "text-slate-700"
-                  }`}
+                  className={`text-sm md:text-base leading-relaxed transition-colors duration-500 ${darkMode ? "text-slate-300" : "text-slate-700"
+                    }`}
                 >
                   {feature.description}
                 </p>
-              </div>
+              </motion.div>
             ))}
           </div>
         </div>
-      </section>
+      </motion.section>
 
       {/* Technology Section */}
-      <section
-        ref={aboutRef}
-        className={`py-24 px-6 md:px-16 opacity-0 translate-y-10 transition-all duration-1000 ease-out ${
-          darkMode ? "bg-slate-950" : "bg-white"
-        }`}
+      <motion.section
+        initial={{ opacity: 0, y: 50 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        viewport={{ once: true, margin: "-100px" }}
+        transition={{ duration: 0.8 }}
+        className={`py-24 px-6 md:px-16 ${darkMode ? "bg-slate-950" : "bg-white"
+          }`}
       >
         <div className="max-w-6xl mx-auto">
           <h2 className="text-3xl md:text-4xl font-bold text-center mb-16">
@@ -637,102 +595,100 @@ export default function LandingPage() {
                 desc: "Multi-layer verification process",
               },
             ].map((tech, index) => (
-              <div
+              <motion.div
                 key={index}
-                className={`animate-on-scroll opacity-0 translate-y-4 transition-all duration-700 ease-out p-5 md:p-6 rounded-xl border group hover:scale-105 ${
-                  darkMode
-                    ? "bg-slate-800/60 border-slate-600 hover:border-emerald-500/50"
-                    : "bg-white border-slate-300 hover:border-emerald-500/50 shadow-sm"
-                }`}
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.5, delay: index * 0.05 }}
+                className={`p-5 md:p-6 rounded-xl border group hover:scale-105 ${darkMode
+                  ? "bg-slate-800/60 border-slate-600 hover:border-emerald-500/50"
+                  : "bg-white border-slate-300 hover:border-emerald-500/50 shadow-sm"
+                  }`}
               >
                 <tech.icon
                   className="text-emerald-400 mb-3 md:mb-4 group-hover:scale-110 transition-transform"
                   size={28}
                 />
                 <h3
-                  className={`text-base md:text-lg font-semibold mb-2 leading-tight ${
-                    darkMode ? "text-white" : "text-slate-900"
-                  }`}
+                  className={`text-base md:text-lg font-semibold mb-2 leading-tight ${darkMode ? "text-white" : "text-slate-900"
+                    }`}
                 >
                   {tech.title}
                 </h3>
                 <p
-                  className={`text-sm leading-relaxed ${
-                    darkMode ? "text-slate-300" : "text-slate-700"
-                  }`}
+                  className={`text-sm leading-relaxed ${darkMode ? "text-slate-300" : "text-slate-700"
+                    }`}
                 >
                   {tech.desc}
                 </p>
-              </div>
+              </motion.div>
             ))}
           </div>
         </div>
-      </section>
+      </motion.section>
 
       {/* CTA Section - Fixed Button Alignment */}
-      <section
-        ref={ctaRef}
-        className={`py-24 px-6 opacity-0 translate-y-10 transition-all duration-1000 ease-out ${
-          darkMode
-            ? "bg-gradient-to-br from-slate-900 to-slate-800"
-            : "bg-gradient-to-br from-slate-100 to-slate-200"
-        }`}
+      <motion.section
+        initial={{ opacity: 0, y: 50 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        viewport={{ once: true, margin: "-100px" }}
+        transition={{ duration: 0.8 }}
+        className={`py-24 px-6 ${darkMode
+          ? "bg-gradient-to-br from-slate-900 to-slate-800"
+          : "bg-gradient-to-br from-slate-100 to-slate-200"
+          }`}
       >
         <div className="max-w-4xl mx-auto text-center">
           <h2
-            className={`text-3xl md:text-5xl font-bold mb-8 ${
-              darkMode ? "text-white" : "text-slate-900"
-            }`}
+            className={`text-3xl md:text-5xl font-bold mb-8 ${darkMode ? "text-white" : "text-slate-900"
+              }`}
           >
             Ready to <span className="text-emerald-400">Secure</span>{" "}
             Healthcare?
           </h2>
           <p
-            className={`text-lg md:text-xl mb-12 ${
-              darkMode ? "text-slate-300" : "text-slate-700"
-            }`}
+            className={`text-lg md:text-xl mb-12 ${darkMode ? "text-slate-300" : "text-slate-700"
+              }`}
           >
             Join thousands of healthcare providers, manufacturers, and
             regulators who trust MedChain for medicine authentication.
           </p>
-          
+
           {/* Fixed Button Container with Proper Centering */}
           <div className="w-full flex flex-col sm:flex-row items-center justify-center gap-4">
             {/* Connect Wallet Button */}
             <div className="flex justify-center">
               <WalletConnect />
             </div>
-            
+
             {/* Learn More Button with Consistent Styling */}
             <button
               onClick={() => scrollToSection("features")}
-              className={`px-8 py-4 border-2 rounded-full text-lg font-semibold transition-all duration-300 hover:scale-105 ${
-                darkMode
-                  ? "border-emerald-500 text-emerald-400 hover:bg-emerald-500 hover:text-white shadow-lg shadow-emerald-500/20"
-                  : "border-emerald-500 text-emerald-600 hover:bg-emerald-500 hover:text-white shadow-lg shadow-emerald-500/20"
-              }`}
+              className={`px-8 py-4 border-2 rounded-full text-lg font-semibold transition-all duration-300 hover:scale-105 ${darkMode
+                ? "border-emerald-500 text-emerald-400 hover:bg-emerald-500 hover:text-white shadow-lg shadow-emerald-500/20"
+                : "border-emerald-500 text-emerald-600 hover:bg-emerald-500 hover:text-white shadow-lg shadow-emerald-500/20"
+                }`}
             >
               Learn More
             </button>
           </div>
         </div>
-      </section>
+      </motion.section>
 
       {/* Footer */}
       <footer
-        className={`py-16 px-6 transition-colors duration-500 ${
-          darkMode
-            ? "text-slate-400 bg-slate-950 border-t border-slate-800"
-            : "text-slate-600 bg-white border-t border-slate-200"
-        }`}
+        className={`py-16 px-6 transition-colors duration-500 ${darkMode
+          ? "text-slate-400 bg-slate-950 border-t border-slate-800"
+          : "text-slate-600 bg-white border-t border-slate-200"
+          }`}
       >
         <div className="max-w-6xl mx-auto">
           <div className="grid grid-cols-1 md:grid-cols-4 gap-8 mb-8">
             <div>
               <h3
-                className={`text-xl font-bold mb-4 ${
-                  darkMode ? "text-white" : "text-slate-900"
-                }`}
+                className={`text-xl font-bold mb-4 ${darkMode ? "text-white" : "text-slate-900"
+                  }`}
               >
                 MedChain
               </h3>
@@ -742,9 +698,8 @@ export default function LandingPage() {
             </div>
             <div>
               <h4
-                className={`font-semibold mb-3 ${
-                  darkMode ? "text-white" : "text-slate-900"
-                }`}
+                className={`font-semibold mb-3 ${darkMode ? "text-white" : "text-slate-900"
+                  }`}
               >
                 Product
               </h4>
@@ -777,9 +732,8 @@ export default function LandingPage() {
             </div>
             <div>
               <h4
-                className={`font-semibold mb-3 ${
-                  darkMode ? "text-white" : "text-slate-900"
-                }`}
+                className={`font-semibold mb-3 ${darkMode ? "text-white" : "text-slate-900"
+                  }`}
               >
                 Company
               </h4>
@@ -812,9 +766,8 @@ export default function LandingPage() {
             </div>
             <div>
               <h4
-                className={`font-semibold mb-3 ${
-                  darkMode ? "text-white" : "text-slate-900"
-                }`}
+                className={`font-semibold mb-3 ${darkMode ? "text-white" : "text-slate-900"
+                  }`}
               >
                 Support
               </h4>
