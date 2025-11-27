@@ -1149,8 +1149,3 @@ journey
   </sub>
 </div>
 
-<<<<<<< HEAD
-</div>
-=======
-</div>
->>>>>>> d43dca2298f1397d437a7c6eef774ffda52aedd7
