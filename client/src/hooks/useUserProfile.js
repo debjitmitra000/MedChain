@@ -7,12 +7,17 @@ import { getUserProfile, getUserDisplayName, getUserProfilePicture } from '../ut
  * @returns {object} Profile data and refresh function
  */
 export function useUserProfile(address) {
-  const [profileData, setProfileData] = useState({
-    name: null,
-    email: null,
-    description: null,
-    website: null,
-    profilePicture: null
+  const [profileData, setProfileData] = useState(() => {
+    if (address) {
+      return getUserProfile(address);
+    }
+    return {
+      name: null,
+      email: null,
+      description: null,
+      website: null,
+      profilePicture: null
+    };
   });
 
   const refreshProfile = () => {
@@ -43,7 +48,7 @@ export function useUserProfile(address) {
     };
 
     window.addEventListener('storage', handleStorageChange);
-    
+
     // Also listen for custom profile update events
     const handleProfileUpdate = (e) => {
       if (e.detail?.address === address) {
@@ -63,6 +68,7 @@ export function useUserProfile(address) {
     profile: profileData,
     displayName: profileData.name || 'Not Set',
     profilePicture: profileData.profilePicture,
+    hasProfile: !!profileData.name,
     refreshProfile
   };
 }

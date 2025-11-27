@@ -126,32 +126,32 @@ export default function Home() {
     
     if (isAdmin) {
       actions.push(
-        { to: '/admin', icon: Settings, title: 'Admin Dashboard', desc: 'Full system management', color: 'purple' },
-        { to: '/manufacturer/verify', icon: CheckCircle2, title: 'Verify Manufacturers', desc: 'Review pending applications', color: 'emerald' },
-        { to: '/manufacturer/list?status=unverified', icon: Clock, title: 'Pending Approvals', desc: 'Manufacturers awaiting verification', color: 'amber' },
-        { to: '/reports/expired', icon: BarChart3, title: 'System Reports', desc: 'View expired medicine reports', color: 'red' }
+        { to: '/app/admin', icon: Settings, title: 'Admin Dashboard', desc: 'Full system management', color: 'purple' },
+        { to: '/app/manufacturer/verify', icon: CheckCircle2, title: 'Verify Manufacturers', desc: 'Review pending applications', color: 'emerald' },
+        { to: '/app/manufacturer/list?status=unverified', icon: Clock, title: 'Pending Approvals', desc: 'Manufacturers awaiting verification', color: 'amber' },
+        { to: '/app/reports/expired', icon: BarChart3, title: 'System Reports', desc: 'View expired medicine reports', color: 'red' }
       );
     } else if (isManufacturer) {
       actions.push(
-        { to: '/manufacturer/me', icon: Users, title: 'My Profile', desc: 'Manage manufacturer details', color: 'blue' },
-        { to: '/manufacturer/me/batches', icon: Package, title: 'My Batches', desc: 'View registered medicine batches', color: 'cyan' }
+        { to: '/app/manufacturer/me', icon: Users, title: 'My Profile', desc: 'Manage manufacturer details', color: 'blue' },
+        { to: '/app/manufacturer/me/batches', icon: Package, title: 'My Batches', desc: 'View registered medicine batches', color: 'cyan' }
       );
       
       if (canRegisterBatch) {
         actions.push(
-          { to: '/batch/register', icon: Plus, title: 'Register Batch', desc: 'Add new medicine batch', color: 'emerald' }
+          { to: '/app/batch/register', icon: Plus, title: 'Register Batch', desc: 'Add new medicine batch', color: 'emerald' }
         );
       }
     } else {
       actions.push(
-        { to: '/verify', icon: Search, title: 'Verify Medicine', desc: 'Scan and verify medicine authenticity', color: 'emerald' },
-        { to: '/manufacturer/list', icon: Factory, title: 'Manufacturers', desc: 'Browse registered manufacturers', color: 'blue' },
-        { to: '/reports/expired', icon: BarChart3, title: 'Safety Reports', desc: 'View expired medicine alerts', color: 'amber' }
+        { to: '/app/verify', icon: Search, title: 'Verify Medicine', desc: 'Scan and verify medicine authenticity', color: 'emerald' },
+        { to: '/app/manufacturer/list', icon: Factory, title: 'Manufacturers', desc: 'Browse registered manufacturers', color: 'blue' },
+        { to: '/app/reports/expired', icon: BarChart3, title: 'Safety Reports', desc: 'View expired medicine alerts', color: 'amber' }
       );
       
       if (canRegisterAsManufacturer && isConnected) {
         actions.push(
-          { to: '/manufacturer/register', icon: UserPlus, title: 'Register as Manufacturer', desc: 'Join the manufacturer network', color: 'indigo' }
+          { to: '/app/manufacturer/register', icon: UserPlus, title: 'Register as Manufacturer', desc: 'Join the manufacturer network', color: 'indigo' }
         );
       }
     }
@@ -420,9 +420,9 @@ export default function Home() {
           </h2>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             {[
-              { to: '/verify', icon: Search, title: 'Verify Medicine', desc: 'Scan QR codes to verify authenticity', color: 'emerald' },
-              { to: '/manufacturer/list', icon: Factory, title: 'Browse Manufacturers', desc: 'Explore verified manufacturers', color: 'blue' },
-              { to: '/reports/expired', icon: BarChart3, title: 'Safety Reports', desc: 'View expired medicine alerts', color: 'amber' }
+              { to: '/app/verify', icon: Search, title: 'Verify Medicine', desc: 'Scan QR codes to verify authenticity', color: 'emerald' },
+              { to: '/app/manufacturer/list', icon: Factory, title: 'Browse Manufacturers', desc: 'Explore verified manufacturers', color: 'blue' },
+              { to: '/app/reports/expired', icon: BarChart3, title: 'Safety Reports', desc: 'View expired medicine alerts', color: 'amber' }
             ].map((action, index) => (
               <Link key={index} to={action.to} className="group">
                 <div className={`p-8 rounded-2xl border transition-all duration-300 hover:scale-105 ${
