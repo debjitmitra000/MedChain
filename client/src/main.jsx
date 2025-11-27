@@ -46,6 +46,7 @@ import AdminDashboard from './pages/AdminDashboard.jsx';
 import ProfileEdit from './pages/ProfileEdit.jsx';
 import HypergraphDemo from './pages/HypergraphDemo.jsx';
 import SubgraphDemo from './pages/SubgraphDemo.jsx';
+import Onboarding from './pages/Onboarding.jsx';
 
 // Wagmi and QueryClient setup
 const chainId = Number(import.meta.env.VITE_CHAIN_ID || 314159);
@@ -80,14 +81,19 @@ const router = createBrowserRouter([
     element: <LandingPage />,
     index: true,
   },
+  // Onboarding route
+  {
+    path: '/onboarding',
+    element: <Onboarding />,
+  },
   // App routes under /app prefix
   {
     path: '/app',
     element: <App />,
     children: [
       { path: '', element: <Home /> }, // Default route when accessing /app
-      { path: 'home', element: <Home /> }, 
-      { path: 'dashboard', element: <Verify /> }, 
+      { path: 'home', element: <Home /> },
+      { path: 'dashboard', element: <Verify /> },
       { path: 'verify', element: <Verify /> },
       { path: 'verify/:batchId', element: <Verify /> },
       { path: 'manufacturer/register', element: <ManufacturerRegister /> },

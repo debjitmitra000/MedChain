@@ -21,13 +21,7 @@
 
 ## 🌟 Overview
 
-# Copy environment template
-cp .env.example .env
-
 MedChain revolutionizes pharmaceutical supply chain security by leveraging **Ethereum blockchain**, **hypergraph data structures**, and **Filecoin's decentralized storage** to create an immutable, transparent medicine authentication system that combats counterfeit drugs globally.
-
-NETWORK=filecoin
-RPC_URL=https://api.calibration.node.glif.io/rpc/v1
 
 <div align="center">
 

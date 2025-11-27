@@ -12,23 +12,28 @@ export const useTheme = () => {
 
 export const ThemeProvider = ({ children }) => {
   const [darkMode, setDarkMode] = useState(() => {
-    // Check localStorage first, then default to true
+    // Check localStorage first
     const saved = localStorage.getItem('medchain-theme');
-    return saved ? JSON.parse(saved) : true;
+    if (saved !== null) {
+      return JSON.parse(saved);
+    }
+    // Fallback to system preference
+    return window.matchMedia('(prefers-color-scheme: dark)').matches;
   });
 
-  const toggleTheme = () => {
-    setDarkMode(prev => {
-      const newTheme = !prev;
-      localStorage.setItem('medchain-theme', JSON.stringify(newTheme));
-      return newTheme;
-    });
-  };
-
-  // Save to localStorage whenever theme changes
   useEffect(() => {
+    const root = window.document.documentElement;
+    if (darkMode) {
+      root.classList.add('dark');
+    } else {
+      root.classList.remove('dark');
+    }
     localStorage.setItem('medchain-theme', JSON.stringify(darkMode));
   }, [darkMode]);
+
+  const toggleTheme = () => {
+    setDarkMode(prev => !prev);
+  };
 
   return (
     <ThemeContext.Provider value={{ darkMode, toggleTheme }}>
