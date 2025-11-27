@@ -3,7 +3,7 @@ const { ethers } = require('ethers');
 const fs = require('fs');
 const path = require('path');
 
-const requiredEnvs = ['NETWORK','CHAIN_ID','PRIVATE_KEY','CONTRACT_ADDRESS','RPC_URL'];
+const requiredEnvs = ['NETWORK', 'CHAIN_ID', 'PRIVATE_KEY', 'CONTRACT_ADDRESS', 'RPC_URL'];
 const missing = requiredEnvs.filter(k => !process.env[k]);
 if (missing.length > 0) {
   console.error('❌ Missing required environment variables:', missing);
@@ -13,6 +13,28 @@ if (missing.length > 0) {
 console.log(`🌐 Network: ${process.env.NETWORK}`);
 console.log(`⛓️ Chain ID: ${process.env.CHAIN_ID}`);
 console.log(`🏠 Contract: ${process.env.CONTRACT_ADDRESS}`);
+
+// Register a custom getUrl function that uses global fetch to avoid Node https issues
+ethers.FetchRequest.registerGetUrl(async (req) => {
+  const response = await fetch(req.url, {
+    method: req.method,
+    headers: req.headers,
+    body: req.body,
+    signal: req.signal
+  });
+
+  const headers = {};
+  response.headers.forEach((value, key) => {
+    headers[key.toLowerCase()] = value;
+  });
+
+  return {
+    statusCode: response.status,
+    statusMessage: response.statusText,
+    headers: headers,
+    body: new Uint8Array(await response.arrayBuffer())
+  };
+});
 
 // Providers
 function createProvider(rpcUrl) {
@@ -97,17 +119,17 @@ const gasSettings = {
 // Startup checks
 (async () => {
   try {
-  const balanceWei = await readProvider.getBalance(wallet.address);
-  const balanceFormatted = ethers.formatEther(balanceWei);
-  const currency = networkConfig.currency || 'ETH';
-  console.log(`💰 Wallet Balance: ${balanceFormatted} ${currency}`);
-  if (balanceWei === 0n) console.warn(`⚠️ Wallet has zero balance (${currency}) - writes will fail`);
+    const balanceWei = await readProvider.getBalance(wallet.address);
+    const balanceFormatted = ethers.formatEther(balanceWei);
+    const currency = networkConfig.currency || 'ETH';
+    console.log(`💰 Wallet Balance: ${balanceFormatted} ${currency}`);
+    if (balanceWei === 0n) console.warn(`⚠️ Wallet has zero balance (${currency}) - writes will fail`);
   } catch (error) {
     console.warn('⚠️ Wallet balance check failed:', error.message);
   }
   if (medChainRead) {
     try {
-      ['getContractStats','registerMedicineBatch','verifyBatch'].forEach(fn => {
+      ['getContractStats', 'registerMedicineBatch', 'verifyBatch'].forEach(fn => {
         if (typeof medChainRead[fn] !== 'function') {
           console.warn(`⚠️ Contract at ${process.env.CONTRACT_ADDRESS} missing function: ${fn}`);
         }

@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from "react";
-import { Outlet, Link, NavLink, useLocation } from "react-router-dom";
+import { Outlet, Link, NavLink, useLocation, useNavigate } from "react-router-dom";
 import { useRole } from "./hooks/useRole";
 import { useTheme } from "./contexts/ThemeContext";
+import { useUserProfile } from "./hooks/useUserProfile";
 import WalletConnect from './components/WalletConnect.jsx';
 import SubgraphStatusIndicator from './components/SubgraphStatusIndicator.jsx';
 import {
@@ -28,9 +29,11 @@ import {
 } from "lucide-react";
 import ErrorBoundary from "./components/ErrorBoundary.jsx";
 import { ToastProvider } from "./components/Toast.jsx";
+import { motion } from "framer-motion";
 
 export default function App() {
   const location = useLocation();
+  const navigate = useNavigate();
   const { darkMode, toggleTheme } = useTheme();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [userMenuOpen, setUserMenuOpen] = useState(false);
@@ -45,6 +48,31 @@ export default function App() {
     canRegisterBatch,
     canRegisterAsManufacturer,
   } = useRole();
+
+  const { hasProfile } = useUserProfile(address);
+
+  // Redirection logic for onboarding
+  // Redirection logic for onboarding
+  useEffect(() => {
+    // Auto-sync manufacturer profile if exists
+    if (isConnected && isManufacturer && manufacturer && !hasProfile) {
+      const profileData = {
+        name: manufacturer.name,
+        email: manufacturer.contactInfo?.email || '',
+        description: `Manufacturer - ${manufacturer.licenseNumber}`,
+        website: manufacturer.website || '',
+        profilePicture: null // Will be fetched separately if needed
+      };
+      localStorage.setItem(`profile_${address.toLowerCase()}`, JSON.stringify(profileData));
+      // Dispatch event to update state immediately
+      window.dispatchEvent(new CustomEvent('profileUpdated', { detail: { address: address.toLowerCase() } }));
+      return; // Skip redirection
+    }
+
+    if (isConnected && !hasProfile && location.pathname !== '/onboarding' && location.pathname !== '/') {
+      navigate('/onboarding');
+    }
+  }, [isConnected, hasProfile, location.pathname, navigate, isManufacturer, manufacturer, address]);
 
   const toggleMobileMenu = () => {
     setMobileMenuOpen(!mobileMenuOpen);
@@ -66,18 +94,16 @@ export default function App() {
       "flex items-center gap-2 px-4 py-2.5 rounded-xl font-medium transition-all duration-300 relative";
 
     if (isActive) {
-      return `${baseClasses} ${
-        darkMode
-          ? "bg-gradient-to-r from-emerald-500 to-emerald-600 text-white shadow-lg shadow-emerald-500/25"
-          : "bg-gradient-to-r from-emerald-500 to-emerald-600 text-white shadow-lg shadow-emerald-500/25"
-      } transform scale-105`;
+      return `${baseClasses} ${darkMode
+        ? "bg-gradient-to-r from-emerald-500 to-emerald-600 text-white shadow-lg shadow-emerald-500/25"
+        : "bg-gradient-to-r from-emerald-500 to-emerald-600 text-white shadow-lg shadow-emerald-500/25"
+        } transform scale-105`;
     }
 
-    return `${baseClasses} ${
-      darkMode
-        ? "text-slate-300 hover:text-white hover:bg-slate-700/60 hover:scale-105"
-        : "text-slate-600 hover:text-slate-900 hover:bg-slate-100 hover:scale-105"
-    }`;
+    return `${baseClasses} ${darkMode
+      ? "text-slate-300 hover:text-white hover:bg-slate-700/60 hover:scale-105"
+      : "text-slate-600 hover:text-slate-900 hover:bg-slate-100 hover:scale-105"
+      }`;
   };
 
   // Mobile nav link styling
@@ -86,18 +112,16 @@ export default function App() {
       "flex items-center gap-3 px-6 py-4 rounded-xl font-medium transition-all duration-300";
 
     if (isActive) {
-      return `${baseClasses} ${
-        darkMode
-          ? "bg-gradient-to-r from-emerald-500 to-emerald-600 text-white"
-          : "bg-gradient-to-r from-emerald-500 to-emerald-600 text-white"
-      }`;
+      return `${baseClasses} ${darkMode
+        ? "bg-gradient-to-r from-emerald-500 to-emerald-600 text-white"
+        : "bg-gradient-to-r from-emerald-500 to-emerald-600 text-white"
+        }`;
     }
 
-    return `${baseClasses} ${
-      darkMode
-        ? "text-slate-300 hover:text-white hover:bg-slate-700/60"
-        : "text-slate-600 hover:text-slate-900 hover:bg-slate-100"
-    }`;
+    return `${baseClasses} ${darkMode
+      ? "text-slate-300 hover:text-white hover:bg-slate-700/60"
+      : "text-slate-600 hover:text-slate-900 hover:bg-slate-100"
+      }`;
   };
 
   const getNavigationItems = () => {
@@ -197,15 +221,15 @@ export default function App() {
             ? "text-emerald-400"
             : "text-emerald-600"
           : darkMode
-          ? "text-amber-400"
-          : "text-amber-600",
+            ? "text-amber-400"
+            : "text-amber-600",
         bgColor: manufacturer?.isVerified
           ? darkMode
             ? "bg-emerald-500/20 border-emerald-500/30"
             : "bg-emerald-50 border-emerald-200"
           : darkMode
-          ? "bg-amber-500/20 border-amber-500/30"
-          : "bg-amber-50 border-amber-200",
+            ? "bg-amber-500/20 border-amber-500/30"
+            : "bg-amber-50 border-amber-200",
       };
     }
 
@@ -222,155 +246,155 @@ export default function App() {
   const roleInfo = getRoleInfo();
   const RoleIcon = roleInfo.icon;
 
+  // Don't show navigation on onboarding page
+  const showNav = location.pathname !== '/onboarding';
+
   return (
     <ToastProvider>
       <ErrorBoundary>
-        <div
-          className={`min-h-screen font-sans transition-colors duration-500 ${
-            darkMode ? "bg-slate-950 text-white" : "bg-slate-50 text-slate-900"
-          }`}
-        >
+        <div className="min-h-screen font-sans transition-colors duration-500">
           {/* Modern Header */}
-          <header
-            className={`sticky top-0 z-50 backdrop-blur-xl border-b transition-all duration-500 ${
-              darkMode
+          {showNav && (
+            <header
+              className={`sticky top-0 z-50 backdrop-blur-xl border-b transition-all duration-500 ${darkMode
                 ? "bg-slate-900/80 border-slate-800"
                 : "bg-white/80 border-slate-200"
-            }`}
-          >
-            <nav className="max-w-7xl mx-auto px-6">
-              <div className="flex items-center justify-between h-20">
-                {/* Logo Section */}
-                <Link
-                  to="/app/home"
-                  className={`flex items-center gap-3 text-2xl font-bold transition-all duration-300 hover:scale-105 ${
-                    darkMode ? "text-white" : "text-slate-900"
-                  }`}
-                >
-                  <span className="bg-gradient-to-r from-emerald-500 to-emerald-600 bg-clip-text text-transparent">
-                    MedChain
-                  </span>
-                </Link>
+                }`}
+            >
+              <nav className="max-w-7xl mx-auto px-6">
+                <div className="flex items-center justify-between h-20">
+                  {/* Logo Section */}
+                  <Link
+                    to="/app/home"
+                    className={`flex items-center gap-3 text-2xl font-bold transition-all duration-300 hover:scale-105 ${darkMode ? "text-white" : "text-slate-900"
+                      }`}
+                  >
+                    <span className="bg-gradient-to-r from-emerald-500 to-emerald-600 bg-clip-text text-transparent">
+                      MedChain
+                    </span>
+                  </Link>
 
-                {/* Desktop Navigation */}
-                <div className="hidden lg:flex items-center gap-2">
-                  {renderNavigation()}
-                </div>
+                  {/* Desktop Navigation */}
+                  <div className="hidden lg:flex items-center gap-2">
+                    {renderNavigation()}
+                  </div>
 
-                {/* Right Side Actions */}
-                <div className="flex items-center gap-4">
-                  {/* Subgraph Status Indicator */}
-                  <SubgraphStatusIndicator />
-                  
-                  {/* Theme Toggle */}
-                  <button
-                    onClick={toggleTheme}
-                    className={`p-3 rounded-xl transition-all duration-300 hover:scale-105 ${
-                      darkMode
+                  {/* Right Side Actions */}
+                  <div className="flex items-center gap-4">
+                    {/* Subgraph Status Indicator */}
+                    <SubgraphStatusIndicator />
+
+                    {/* Theme Toggle */}
+                    <button
+                      onClick={toggleTheme}
+                      className={`p-3 rounded-xl transition-all duration-300 hover:scale-105 ${darkMode
                         ? "bg-slate-800 hover:bg-slate-700 text-cyan-400"
                         : "bg-white hover:bg-slate-50 text-slate-700 shadow-lg"
-                    }`}
-                  >
-                    {darkMode ? <Sun size={20} /> : <Moon size={20} />}
-                  </button>
+                        }`}
+                    >
+                      {darkMode ? <Sun size={20} /> : <Moon size={20} />}
+                    </button>
 
-                  {/* User Info - Desktop */}
-                  {isConnected && (
-                    <div className="hidden md:block relative">
-                      <button
-                        onClick={() => setUserMenuOpen(!userMenuOpen)}
-                        className={`flex items-center gap-3 px-4 py-2.5 rounded-xl font-medium transition-all duration-300 hover:scale-105 border ${roleInfo.bgColor}`}
-                      >
-                        <RoleIcon className={`w-4 h-4 ${roleInfo.color}`} />
-                        <div className="text-left">
-                          <div
-                            className={`text-sm font-semibold ${roleInfo.color}`}
-                          >
-                            {roleInfo.text}
+                    {/* User Info - Desktop */}
+                    {isConnected && (
+                      <div className="hidden md:block relative">
+                        <button
+                          onClick={() => setUserMenuOpen(!userMenuOpen)}
+                          className={`flex items-center gap-3 px-4 py-2.5 rounded-xl font-medium transition-all duration-300 hover:scale-105 border ${roleInfo.bgColor}`}
+                        >
+                          <RoleIcon className={`w-4 h-4 ${roleInfo.color}`} />
+                          <div className="text-left">
+                            <div
+                              className={`text-sm font-semibold ${roleInfo.color}`}
+                            >
+                              {roleInfo.text}
+                            </div>
                           </div>
-                        </div>
-                      </button>
-                    </div>
-                  )}
+                        </button>
+                      </div>
+                    )}
 
-                  {/* Wallet Connect */}
-                  <WalletConnect darkMode={darkMode} />
+                    {/* Wallet Connect */}
+                    <WalletConnect darkMode={darkMode} />
 
-                  {/* Mobile Menu Button */}
-                  <button
-                    onClick={toggleMobileMenu}
-                    className={`lg:hidden p-3 rounded-xl transition-all duration-300 hover:scale-105 ${
-                      darkMode
+                    {/* Mobile Menu Button */}
+                    <button
+                      onClick={toggleMobileMenu}
+                      className={`lg:hidden p-3 rounded-xl transition-all duration-300 hover:scale-105 ${darkMode
                         ? "bg-slate-800 hover:bg-slate-700 text-white"
                         : "bg-white hover:bg-slate-50 text-slate-900 shadow-lg"
-                    }`}
-                  >
-                    {mobileMenuOpen ? <X size={20} /> : <Menu size={20} />}
-                  </button>
-                </div>
-              </div>
-            </nav>
-
-            {/* Mobile Navigation Menu */}
-            <div
-              className={`lg:hidden transition-all duration-500 ease-in-out overflow-hidden ${
-                mobileMenuOpen ? "max-h-screen opacity-100" : "max-h-0 opacity-0"
-              }`}
-            >
-              <div
-                className={`border-t ${
-                  darkMode ? "border-slate-800" : "border-slate-200"
-                }`}
-              >
-                <div className="px-6 py-6 space-y-2">
-                  {renderMobileNavigation()}
-
-                  {/* Mobile User Info */}
-                  {isConnected && (
-                    <div
-                      className={`mt-6 pt-6 border-t ${
-                        darkMode ? "border-slate-800" : "border-slate-200"
-                      }`}
+                        }`}
                     >
+                      {mobileMenuOpen ? <X size={20} /> : <Menu size={20} />}
+                    </button>
+                  </div>
+                </div>
+              </nav>
+
+              {/* Mobile Navigation Menu */}
+              <div
+                className={`lg:hidden transition-all duration-500 ease-in-out overflow-hidden ${mobileMenuOpen ? "max-h-screen opacity-100" : "max-h-0 opacity-0"
+                  }`}
+              >
+                <div
+                  className={`border-t ${darkMode ? "border-slate-800" : "border-slate-200"
+                    }`}
+                >
+                  <div className="px-6 py-6 space-y-2">
+                    {renderMobileNavigation()}
+
+                    {/* Mobile User Info */}
+                    {isConnected && (
                       <div
-                        className={`flex items-center gap-3 px-6 py-4 rounded-xl border ${roleInfo.bgColor}`}
+                        className={`mt-6 pt-6 border-t ${darkMode ? "border-slate-800" : "border-slate-200"
+                          }`}
                       >
-                        <RoleIcon className={`w-5 h-5 ${roleInfo.color}`} />
-                        <div>
-                          <div className={`font-semibold ${roleInfo.color}`}>
-                            {roleInfo.text}
-                          </div>
-                          <div
-                            className={`text-sm font-mono ${
-                              darkMode ? "text-slate-400" : "text-slate-500"
-                            }`}
-                          >
-                            {address?.slice(0, 10)}...{address?.slice(-8)}
+                        <div
+                          className={`flex items-center gap-3 px-6 py-4 rounded-xl border ${roleInfo.bgColor}`}
+                        >
+                          <RoleIcon className={`w-5 h-5 ${roleInfo.color}`} />
+                          <div>
+                            <div className={`font-semibold ${roleInfo.color}`}>
+                              {roleInfo.text}
+                            </div>
+                            <div
+                              className={`text-sm font-mono ${darkMode ? "text-slate-400" : "text-slate-500"
+                                }`}
+                            >
+                              {address?.slice(0, 10)}...{address?.slice(-8)}
+                            </div>
                           </div>
                         </div>
                       </div>
-                    </div>
-                  )}
+                    )}
+                  </div>
                 </div>
               </div>
-            </div>
-          </header>
+            </header>
+          )}
 
           {/* Floating Geometric Shapes Background */}
           <div className="fixed inset-0 overflow-hidden pointer-events-none">
-            <div className="absolute top-20 left-10 w-16 h-16 bg-emerald-500/5 rounded-full animate-pulse"></div>
-            <div
-              className="absolute top-40 right-20 w-8 h-8 bg-blue-500/10 rotate-45 animate-spin"
-              style={{ animationDuration: "8s" }}
-            ></div>
-            <div
-              className="absolute bottom-32 left-20 w-12 h-12 bg-purple-500/5 rounded-full animate-bounce"
-              style={{ animationDelay: "1s" }}
-            ></div>
-            <div
-              className="absolute bottom-40 right-10 w-6 h-6 bg-amber-500/10 rotate-12 animate-pulse"
-              style={{ animationDelay: "2s" }}
-            ></div>
+            <motion.div
+              animate={{ scale: [1, 1.2, 1], opacity: [0.3, 0.6, 0.3] }}
+              transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
+              className="absolute top-20 left-10 w-16 h-16 bg-emerald-500/5 rounded-full will-change-transform"
+            />
+            <motion.div
+              animate={{ rotate: 360 }}
+              transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
+              className="absolute top-40 right-20 w-8 h-8 bg-blue-500/10 will-change-transform"
+            />
+            <motion.div
+              animate={{ y: [0, -20, 0] }}
+              transition={{ duration: 3, repeat: Infinity, ease: "easeInOut", delay: 1 }}
+              className="absolute bottom-32 left-20 w-12 h-12 bg-purple-500/5 rounded-full will-change-transform"
+            />
+            <motion.div
+              animate={{ opacity: [0.2, 0.5, 0.2], rotate: [0, 10, 0] }}
+              transition={{ duration: 5, repeat: Infinity, ease: "easeInOut", delay: 2 }}
+              className="absolute bottom-40 right-10 w-6 h-6 bg-amber-500/10 will-change-transform"
+            />
           </div>
 
           {/* Main Content Area */}
